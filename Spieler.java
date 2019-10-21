@@ -6,7 +6,7 @@ public class Spieler {
 	}
 	private PlayerType playerType;
 
-	Spieler(String name) { this.name = name; }
+	Spieler(String name, Character symbol) { this.name = name; this.symbol = symbol; }
 	public boolean isHuman() { return playerType == PlayerType.HUMAN; }
 	public void setName(String name) { this.name = name; };
 	public String getName() { return name; }
