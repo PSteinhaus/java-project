@@ -1,5 +1,6 @@
 public class Spieler {
 	private String name;
+	private Character symbol;
 	enum PlayerType {
 		HUMAN, COMPUTER
 	}
@@ -9,4 +10,6 @@ public class Spieler {
 	public boolean isHuman() { return playerType == PlayerType.HUMAN; }
 	public void setName(String name) { this.name = name; };
 	public String getName() { return name; }
+	public void setSymbol(Character symbol) { this.symbol = symbol; };
+	public Character getSymbol() { return symbol; }
 }

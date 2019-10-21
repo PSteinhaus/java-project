@@ -8,7 +8,19 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	private Spieler getPlayer(int x, int y) { return stones[x][y]; };
 	private void setPlayer(Spieler player, int x, int y) { stones[x][y] = player; };
 
-	public void render() {};
+	public void render() {
+		for(int i=0; i<width; i++) {
+			for(int j=height-1; j>=0; j--) {
+				Spieler player = getPlayer(i,j);
+				if( player == null )
+					System.out.print(".");
+				else
+					System.out.print( player.getSymbol() );
+			}
+			System.out.println();
+		}
+	};
+
 	public int placeStone(Spieler player, int column) {
 		// suche nach der niedrigsten freien Stelle in der Spalte
 		for(int i=0; i<height; i++) {
