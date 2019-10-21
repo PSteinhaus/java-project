@@ -2,8 +2,6 @@ import java.util.Scanner;
 
 public class VierGewinnt extends Spiel {
 	private final int PLAYERNUMBER = 2;	// Anzahl der Spieler
-	private final int WIDTH = 7;		// Breite des Spielbretts
-	private final int HEIGHT = 6;		// Höhe des Spielbretts
 
 	VierGewinnt() {
 		spieler = new Spieler[PLAYERNUMBER];
@@ -18,7 +16,11 @@ public class VierGewinnt extends Spiel {
 			Character newSymbol = scanner.next().charAt(0);
 			spieler[i] = new Spieler(newName,newSymbol);
 		}
-		spielfeld = new VierGewinntSpielfeld(WIDTH,HEIGHT);
+		System.out.print("Breite des Spielbretts: ");
+		int width = scanner.nextInt();
+		System.out.print("Höhe des Spielbretts: ");
+		int height = scanner.nextInt();
+		spielfeld = new VierGewinntSpielfeld(width,height);
 		spielfeld.render();	// gib das leere Anfangs-Spielfeld aus
 	};
 
