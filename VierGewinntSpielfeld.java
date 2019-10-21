@@ -9,13 +9,14 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	private void setPlayer(Spieler player, int x, int y) { stones[x][y] = player; };
 
 	public void render() {
-		for(int i=0; i<width; i++) {
-			for(int j=height-1; j>=0; j--) {
+		for(int j=height-1; j>=0; j--) {
+			for(int i=0; i<width; i++) {
 				Spieler player = getPlayer(i,j);
 				if( player == null )
 					System.out.print(".");
 				else
 					System.out.print( player.getSymbol() );
+				System.out.print(" ");
 			}
 			System.out.println();
 		}

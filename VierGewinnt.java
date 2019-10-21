@@ -15,7 +15,7 @@ public class VierGewinnt extends Spiel {
 			System.out.print("Spieler "+(i+1)+", gib deinen Namen ein: ");
 			String newName = scanner.next();
 			System.out.print("Wähle dein Symbol (genau ein Zeichen): ");
-			Character newSymbol = scanner.nextChar();
+			Character newSymbol = scanner.next().charAt(0);
 			spieler[i] = new Spieler(newName,newSymbol);
 		}
 		spielfeld = new VierGewinntSpielfeld(WIDTH,HEIGHT);
