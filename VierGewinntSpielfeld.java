@@ -37,9 +37,49 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	private void checkWinCondition(int xCenter, int yCenter) {
 		// überprüfe die Umgebung der gegebenen Koordinate auf "vier in einer Reihe"
 		// und speichere den Sieger (falls es einen gibt) in der Variable "winner" ab
+		// horizontal
+		checkLineForWinner(xCenter-3,yCenter, xCenter+3,yCenter);
+		// vertikal
+		checkLineForWinner(xCenter,yCenter-3, xCenter,yCenter+3);
+		// diagonal links oben rechts unten
+		checkLineForWinner(xCenter-3,yCenter+3, xCenter+3,yCenter-3);
+		// diagonal links unten rechts oben
+		checkLineForWinner(xCenter-3,yCenter-3, xCenter+3,yCenter+3);
+	};
 
-		// TODO
-	}
+	private void checkLineForWinner(int x_start, int y_start, int x_end, int y_end) {
+		if( winner != null ) return; // wenn es schon einen Sieger gibt suche nicht weiter
+		// ansonsten starte eine Wanderung von Start- zu Zielpunkt
+		// stell vorher sicher, dass die Werte innerhalb des Spielbretts liegen
+		x_start	= Helper.ensureRange(x_start,0,width-1);
+		x_end	= Helper.ensureRange(x_end,0,width-1);
+		y_start	= Helper.ensureRange(y_start,0,height-1);
+		y_end	= Helper.ensureRange(y_end,0,height-1);
+		SimpleLine.setCoords(x_start,y_start,x_end,y_end);
+
+		int[] point = {x_start,y_start};
+		int inEinerReihe = 0;
+		Spieler steinBesitzer = null;
+		while(true) {
+			Spieler neuerSteinBesitzer = getPlayer(point[0],point[1]);
+			if( neuerSteinBesitzer != null ) {
+				if( neuerSteinBesitzer == steinBesitzer )
+					inEinerReihe++;
+				else
+					inEinerReihe = 1;
+			}
+			else {
+				inEinerReihe = 0;
+			}
+			steinBesitzer = neuerSteinBesitzer;
+			if( inEinerReihe == 4 ) {
+				winner = steinBesitzer;
+				break;
+			}
+			if( point[0] == x_end && point[1] == y_end ) break; // prüfe, ob der Endpunkt erreicht wurde
+			point = SimpleLine.next();							// gehe zum nächsten Punkt
+		}		
+	};
 
 	public boolean checkDrawCondition() {
 		// teste auf Unentschieden
@@ -53,4 +93,36 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	};
 
 	public Spieler checkForWinner() { return winner; };
+}
+
+class SimpleLine {
+	// gibt die Koordinaten von Punkten auf einer Geraden zwischen zwei gegebenen Punkten wieder
+	// funktioniert nur für horizontale, vertikale und perfekt diagonale Geraden
+	private static int[] startPoint = new int[2];
+	private static int[] endPoint 	= new int[2];
+
+	static public void setCoords(int x_start, int y_start, int x_end, int y_end) {
+		startPoint[0]	= x_start;
+		startPoint[1] 	= y_start;
+		endPoint[0]	= x_end;
+		endPoint[1]	= y_end;
+	}
+
+	static public int[] next() {
+		// bewege die Punkte Richtung Ziel
+		// x
+		if( startPoint[0] < endPoint[0] )		startPoint[0]++;
+		else if( startPoint[0] > endPoint[0] )	startPoint[0]--;
+		// y
+		if( startPoint[1] < endPoint[1] )		startPoint[1]++;
+		else if( startPoint[1] > endPoint[1] )	startPoint[1]--;
+		// gib den aktuellen Wegpunkt aus
+		return startPoint;
+	}
+}
+
+class Helper {
+	static public int ensureRange(int value, int min, int max) {
+	   return Math.min(Math.max(value, min), max);
+	}
 }
