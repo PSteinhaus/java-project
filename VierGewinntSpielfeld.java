@@ -50,31 +50,28 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	private void checkLineForWinner(int x_start, int y_start, int x_end, int y_end) {
 		if( winner != null ) return; // wenn es schon einen Sieger gibt suche nicht weiter
 		// ansonsten starte eine Wanderung von Start- zu Zielpunkt
-		// stell vorher sicher, dass die Werte innerhalb des Spielbretts liegen
-		x_start	= Helper.ensureRange(x_start,0,width-1);
-		x_end	= Helper.ensureRange(x_end,0,width-1);
-		y_start	= Helper.ensureRange(y_start,0,height-1);
-		y_end	= Helper.ensureRange(y_end,0,height-1);
 		SimpleLine.setCoords(x_start,y_start,x_end,y_end);
 
 		int[] point = {x_start,y_start};
 		int inEinerReihe = 0;
 		Spieler steinBesitzer = null;
 		while(true) {
-			Spieler neuerSteinBesitzer = getPlayer(point[0],point[1]);
-			if( neuerSteinBesitzer != null ) {
-				if( neuerSteinBesitzer == steinBesitzer )
-					inEinerReihe++;
-				else
-					inEinerReihe = 1;
-			}
-			else {
-				inEinerReihe = 0;
-			}
-			steinBesitzer = neuerSteinBesitzer;
-			if( inEinerReihe == 4 ) {
-				winner = steinBesitzer;
-				break;
+			if( Helper.inRange(point[0],0,width-1) && Helper.inRange(point[1],0,height-1) ) { // stell sicher, dass die Werte innerhalb des Spielbretts liegen
+				Spieler neuerSteinBesitzer = getPlayer(point[0],point[1]);
+				if( neuerSteinBesitzer != null ) {
+					if( neuerSteinBesitzer == steinBesitzer )
+						inEinerReihe++;
+					else
+						inEinerReihe = 1;
+				}
+				else {
+					inEinerReihe = 0;
+				}
+				steinBesitzer = neuerSteinBesitzer;
+				if( inEinerReihe == 4 ) {
+					winner = steinBesitzer;
+					break;
+				}
 			}
 			if( point[0] == x_end && point[1] == y_end ) break; // prüfe, ob der Endpunkt erreicht wurde
 			point = SimpleLine.next();							// gehe zum nächsten Punkt
@@ -124,5 +121,8 @@ class SimpleLine {
 class Helper {
 	static public int ensureRange(int value, int min, int max) {
 	   return Math.min(Math.max(value, min), max);
+	}
+	static public boolean inRange(int value, int min, int max) {
+		return (value>= min) && (value<= max);
 	}
 }
