@@ -5,34 +5,10 @@ public class VierGewinntSpielfeld extends Spielfeld {
 		super(width,height);
 		stones = new Spieler[width][height]; // initialisiert alle Spielsteine auf "null"
 	};
+
 	private Spieler getPlayer(int x, int y) { return stones[x][y]; };
+
 	private void setPlayer(Spieler player, int x, int y) { stones[x][y] = player; };
-
-	public void render() {
-		for(int j=height-1; j>=0; j--) {
-			for(int i=0; i<width; i++) {
-				Spieler player = getPlayer(i,j);
-				if( player == null )
-					System.out.print(".");
-				else
-					System.out.print( player.getSymbol() );
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-	};
-
-	public int placeStone(Spieler player, int column) {
-		// suche nach der niedrigsten freien Stelle in der Spalte
-		for(int i=0; i<height; i++) {
-			if( getPlayer(column,i) == null ) {	// falls der Platz frei ist
-				setPlayer(player,column,i);		// platziere den Stein dort
-				checkWinCondition(column,i);	// überprüfe, ob der Spieler damit gewonnen hat
-				return i;
-			}
-		}
-		return -1;	// kein freier Platz übrig
-	};
 
 	private void checkWinCondition(int xCenter, int yCenter) {
 		// überprüfe die Umgebung der gegebenen Koordinate auf "vier in einer Reihe"
@@ -90,6 +66,32 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	};
 
 	public Spieler checkForWinner() { return winner; };
+
+	public void render() {
+		for(int j=height-1; j>=0; j--) {
+			for(int i=0; i<width; i++) {
+				Spieler player = getPlayer(i,j);
+				if( player == null )
+					System.out.print(".");
+				else
+					System.out.print( player.getSymbol() );
+				System.out.print(" ");
+			}
+			System.out.println();
+		}
+	};
+
+	public int placeStone(Spieler player, int column) {
+		// suche nach der niedrigsten freien Stelle in der Spalte
+		for(int i=0; i<height; i++) {
+			if( getPlayer(column,i) == null ) {	// falls der Platz frei ist
+				setPlayer(player,column,i);		// platziere den Stein dort
+				checkWinCondition(column,i);	// überprüfe, ob der Spieler damit gewonnen hat
+				return i;
+			}
+		}
+		return -1;	// kein freier Platz übrig
+	};
 }
 
 class SimpleLine {
