@@ -24,7 +24,7 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	};
 
 	private void checkLineForWinner(int x_start, int y_start, int x_end, int y_end) {
-		if( winner != null ) return; // wenn es schon einen Sieger gibt suche nicht weiter
+		if( winnerOrLoser != null ) return; // wenn es schon einen Sieger gibt suche nicht weiter
 		// ansonsten starte eine Wanderung von Start- zu Zielpunkt
 		SimpleLine.setCoords(x_start,y_start,x_end,y_end);
 
@@ -45,7 +45,7 @@ public class VierGewinntSpielfeld extends Spielfeld {
 				}
 				steinBesitzer = neuerSteinBesitzer;
 				if( inEinerReihe == 4 ) {
-					winner = steinBesitzer;
+					winnerOrLoser = steinBesitzer;
 					break;
 				}
 			}
@@ -64,8 +64,6 @@ public class VierGewinntSpielfeld extends Spielfeld {
 			}
 		return true;
 	};
-
-	public Spieler checkForWinner() { return winner; };
 
 	public void render() {
 		for(int j=height-1; j>=0; j--) {

@@ -5,22 +5,10 @@ public class VierGewinnt extends Spiel {
 
 	VierGewinnt() {
 		spieler = new Spieler[PLAYERNUMBER];
-		// lass einen Scanner den Kommandozeilen-input mitlesen
-		Scanner scanner = new Scanner(System.in);
 		System.out.println("Willkommen im Vier-Gewinnt-Prototypen!");
-		// erfasse die Namen der Spieler
-		for(int i=0; i<PLAYERNUMBER; i++) {
-			System.out.print("Spieler "+(i+1)+", gib deinen Namen ein: ");
-			String newName = scanner.next();
-			System.out.print("Wähle dein Symbol (genau ein Zeichen): ");
-			Character newSymbol = scanner.next().charAt(0);
-			spieler[i] = new Spieler(newName,newSymbol);
-		}
-		System.out.print("Breite des Spielbretts: ");
-		int width = scanner.nextInt();
-		System.out.print("Höhe des Spielbretts: ");
-		int height = scanner.nextInt();
-		spielfeld = new VierGewinntSpielfeld(width,height);
+		// erfasse die Namen der Spieler & die Dimensionen des Spielbretts
+		int[] dimensions = getNamesAndDimensions();
+		spielfeld = new VierGewinntSpielfeld(dimensions[0],dimensions[1]);
 		spielfeld.render();	// gib das leere Anfangs-Spielfeld aus
 	};
 
@@ -51,16 +39,11 @@ public class VierGewinnt extends Spiel {
 		pushTurn(spieler,x,y);	// protokolliere den Zug
 	}
 
-	private void checkForEndOfGame() {
+	public void checkForEndOfGame() {
 		// teste auf Sieg
-		Spieler winner = ((VierGewinntSpielfeld)spielfeld).checkForWinner();
+		Spieler winner = spielfeld.checkForWinner();
 		if( winner != null ) {
 			System.out.println(winner.getName()+" hat gewonnen!");
-			System.exit(0);
-		}
-		// teste auf Unentschieden
-		else if( ((VierGewinntSpielfeld)spielfeld).checkDrawCondition() ) {
-			System.out.println("Unentschieden!");
 			System.exit(0);
 		}
 	}
