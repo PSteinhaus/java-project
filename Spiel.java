@@ -7,7 +7,7 @@ public abstract class Spiel implements Protokollierbar {
 
 	public abstract void startRound();
 	public abstract void takeTurn(Spieler player);
-	public int[] getNamesAndDimensions() {	// erfasse am Anfang des Spieles die Namen und Symbole der Spieler, sowie die Dimensionen des Spielbretts
+	public int[] getNamesAndDimensions() {	// erfasse am Anfang des Spieles die Namen und Symbole der Spieler (und ob sie Menschen sind), sowie die Dimensionen des Spielbretts
 		Scanner scanner = new Scanner(System.in);
 		// Namen
 		for(int i=0; i<spieler.length; i++) {
@@ -15,7 +15,9 @@ public abstract class Spiel implements Protokollierbar {
 			String newName = scanner.next();
 			System.out.print("Wähle dein Symbol (genau ein Zeichen): ");
 			Character newSymbol = scanner.next().charAt(0);
-			spieler[i] = new Spieler(newName,newSymbol);
+			System.out.print("Bist du ein Mensch? (j/n) ");
+			boolean human = scanner.next().charAt(0) == 'j';
+			spieler[i] = new Spieler(newName,newSymbol,human);
 		}
 		// Dimensionen
 		int[] dimensions = new int[2];

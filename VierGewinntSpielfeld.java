@@ -80,15 +80,18 @@ public class VierGewinntSpielfeld extends Spielfeld {
 	};
 
 	public int placeStone(Spieler player, int column) {
-		// suche nach der niedrigsten freien Stelle in der Spalte
-		for(int i=0; i<height; i++) {
-			if( getPlayer(column,i) == null ) {	// falls der Platz frei ist
-				setPlayer(player,column,i);		// platziere den Stein dort
-				checkWinCondition(column,i);	// überprüfe, ob der Spieler damit gewonnen hat
-				return i;
+		// zuerst stelle sicher, dass die gewählte Spalte existiert
+		if( Helper.inRange( column, 0,getWidth()-1 ) ) {
+			// suche nach der niedrigsten freien Stelle in der Spalte
+			for(int i=0; i<height; i++) {
+				if( getPlayer(column,i) == null ) {	// falls der Platz frei ist
+					setPlayer(player,column,i);		// platziere den Stein dort
+					checkWinCondition(column,i);	// überprüfe, ob der Spieler damit gewonnen hat
+					return i;
+				}
 			}
 		}
-		return -1;	// kein freier Platz übrig
+		return -1;	// kein freier Platz übrig (Zug nicht akzeptiert)
 	};
 }
 
@@ -115,14 +118,5 @@ class SimpleLine {
 		else if( startPoint[1] > endPoint[1] )	startPoint[1]--;
 		// gib den aktuellen Wegpunkt aus
 		return startPoint;
-	}
-}
-
-class Helper {
-	static public int ensureRange(int value, int min, int max) {
-	   return Math.min(Math.max(value, min), max);
-	}
-	static public boolean inRange(int value, int min, int max) {
-		return (value>= min) && (value<= max);
 	}
 }

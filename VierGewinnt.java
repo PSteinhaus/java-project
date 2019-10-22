@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class VierGewinnt extends Spiel {
 	private final int PLAYERNUMBER = 2;	// Anzahl der Spieler
@@ -24,17 +25,29 @@ public class VierGewinnt extends Spiel {
 	};
 
 	public void takeTurn(Spieler spieler) {
-		// Lass einen Scanner den Kommandozeilen-input mitlesen
-		Scanner scanner = new Scanner(System.in);
 		int x,y;
-		while(true) {
-			// bitte um Eingabe des Zuges
-			System.out.print("Wähle eine Spalte: ");
-			// lies die Zahl und platziere den Stein
-			x = scanner.nextInt() -1;
-			y = ((VierGewinntSpielfeld)spielfeld).placeStone(spieler, x);
-			if( y >= 0 ) break;	// falls der Stein platziert wurde akzeptiere den Zug
-			System.out.println("Diese Spalte ist bereits voll.");
+		if( spieler.isHuman() ) {
+			// Lass einen Scanner den Kommandozeilen-input mitlesen
+			Scanner scanner = new Scanner(System.in);
+			while(true) {
+				// bitte um Eingabe des Zuges
+				System.out.print("Wähle eine Spalte: ");
+				// lies die Zahl und platziere den Stein
+				x = scanner.nextInt() -1;
+				y = ((VierGewinntSpielfeld)spielfeld).placeStone(spieler, x);
+				if( y >= 0 ) break;	// falls der Stein platziert wurde akzeptiere den Zug
+				System.out.println("Diese Spalte ist bereits voll.");
+			}
+		}
+		else {	// falls der Spieler ein Computer ist
+			while(true) {
+				// lass ihn eine zufällige Spalte wählen
+				// nextInt schließt normalerweise den größeren Wert aus,
+				// also erhöhe ihn vorher um 1
+				x = ThreadLocalRandom.current().nextInt(0, spielfeld.getWidth());
+				y = ((VierGewinntSpielfeld)spielfeld).placeStone(spieler, x);
+				if( y >= 0 ) break;	// falls der Stein platziert wurde akzeptiere den Zug
+			}
 		}
 		pushTurn(spieler,x,y);	// protokolliere den Zug
 	}
