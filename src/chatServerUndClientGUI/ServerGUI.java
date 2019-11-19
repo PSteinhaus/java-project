@@ -15,16 +15,23 @@ public class ServerGUI {
         Integer port = null;
         while(port == null) {
             // get the port
-            String s = (String) JOptionPane.showInputDialog(
+            JTextField portField = new JPasswordField();
+            Object[] message = {
+                    "Server port:", portField
+            };
+
+            int option = JOptionPane.showConfirmDialog(
                     frame,
-                    "Server port:",
+                    message,
                     "",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    null,
-                    "");
-            try { port = Integer.parseInt(s); }
-            catch (NumberFormatException nfe) { port = null; }
+                    JOptionPane.OK_CANCEL_OPTION);
+
+            if (option == JOptionPane.OK_OPTION) {
+                try { port = Integer.parseInt(portField.getText()); }
+                catch (NumberFormatException nfe) { port = null; }
+            }
+            else { return; }
+
         }
 
         // Creating the panel at bottom and adding components
