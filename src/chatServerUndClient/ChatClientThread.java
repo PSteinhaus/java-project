@@ -2,17 +2,20 @@ package chatServerUndClient;
 
 import java.net.*;
 import java.io.*;
+import chatServerUndClientGUI.ClientGUI;
 
 // this thread mainly listens
 public class ChatClientThread extends Thread {
    private Socket           socket   = null;
    private ChatClient       client   = null;
+   private ClientGUI        gui      = null;
    private DataInputStream  streamIn = null;
    private boolean          stopped  = false;
 
-   public ChatClientThread(ChatClient _client, Socket _socket) { 
+   public ChatClientThread(ChatClient _client, Socket _socket, ClientGUI _gui) {
       client   = _client;
       socket   = _socket;
+      gui      = _gui;
       open();  
       start();
    }
@@ -50,12 +53,16 @@ public class ChatClientThread extends Thread {
    }
 
    public void handle(String msg) {
-      if (msg.equals(".bye")) {
-         System.out.println("Good bye. Press RETURN to exit ...");
-         client.stop();
+      if( gui == null ) {
+         if (msg.equals(".bye")) {
+            System.out.println("Good bye. Press RETURN to exit ...");
+            client.stop();
+         }
+         else System.out.println(msg);
       }
-      else
-         System.out.println(msg);
+      else {
+         gui.writeMessage(msg);
+      }
    }
 
 }

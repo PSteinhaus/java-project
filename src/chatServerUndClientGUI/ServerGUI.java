@@ -1,16 +1,19 @@
 package chatServerUndClientGUI;
 
+import chatServerUndClient.ChatServer;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class ServerGUI {
+    private ChatServer chatServer = null;
+    private JTextArea ta         = null;
 
-    public static void main(String[] args) {
-
+    private ServerGUI() {
         // Creating the Frame
         JFrame frame = new JFrame("Server");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(500, 400);
 
         Integer port = null;
         while(port == null) {
@@ -31,7 +34,6 @@ public class ServerGUI {
                 catch (NumberFormatException nfe) { port = null; }
             }
             else { return; }
-
         }
 
         // Creating the panel at bottom and adding components
@@ -40,7 +42,7 @@ public class ServerGUI {
         panel.add(send);
 
         // Text Area at the Center
-        JTextArea ta = new JTextArea();
+        ta = new JTextArea();
 
         // User list at the Center
         JList list = new JList();
@@ -51,5 +53,16 @@ public class ServerGUI {
         frame.getContentPane().add(BorderLayout.EAST, ta);
         frame.getContentPane().add(BorderLayout.WEST, userList);
         frame.setVisible(true);
+
+        // start the server (workhorse)
+        chatServer = new ChatServer(port, this);
+    }
+
+    public void writeMessage(String message) {
+        ta.append(message);
+    }
+
+    public static void main(String[] args) {
+        ServerGUI serverGUI = new ServerGUI();
     }
 }

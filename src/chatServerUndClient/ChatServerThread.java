@@ -20,6 +20,7 @@ public class ChatServerThread extends Thread {
       try {
          streamOut.writeUTF(msg);
          streamOut.flush();
+         server.writeServerOutput(msg);
       }
       catch(IOException ioe) {
          System.out.println(getUsername() + " ERROR sending: " + ioe.getMessage());
@@ -48,7 +49,7 @@ public class ChatServerThread extends Thread {
    }
 
    public void run() {
-      System.out.println("Server Thread " + socket.getPort() + " running.");
+      server.writeServerOutput("Server Thread " + socket.getPort() + " running.");
       // login user
       login();
       // handle further input
@@ -57,7 +58,7 @@ public class ChatServerThread extends Thread {
             server.handle(this, streamIn.readUTF());
          }
          catch(IOException ioe) {
-            System.out.println("ERROR reading: " + ioe.getMessage());
+            server.writeServerOutput("ERROR reading: " + ioe.getMessage());
             server.remove(this);
             stopThread();
          }
@@ -74,7 +75,7 @@ public class ChatServerThread extends Thread {
             send("Password: ");
             password = streamIn.readUTF();
          } catch(IOException ioe) {
-            System.out.println("Error logging in: " + ioe);
+            server.writeServerOutput("Error logging in: " + ioe);
          }
          user = server.getUser(username);
          if(user != null) {

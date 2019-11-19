@@ -1,13 +1,20 @@
 package chatServerUndClientGUI;
 
+import chatServerUndClient.ChatClient;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 public class ClientGUI implements ActionListener {
     private JMenuItem menuItemConnect = null;
+    private JMenuItem menuItemDisconnect = null;
+    private JTextField tf = null;
+    private JTextArea ta = null;
     private JFrame frame;
+    private ChatClient chatClient = null;
 
     public static void main(String[] args) {
 
@@ -27,19 +34,41 @@ public class ClientGUI implements ActionListener {
 
             int option = JOptionPane.showConfirmDialog(frame, message, "Choose server", JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
-                // ToDo : give this action actual functionality (connect to server)
-                //if (ip.getText().equals("h") && port.getText().equals("h")) {
+                // first disconnect
+                if(chatClient != null) {
+                    chatClient.stop();
+                    chatClient = null;
+                }
+                // start the ChatClient (workhorse)
+                try { chatClient = new ChatClient( ip.getText(), Integer.parseInt(port.getText()), this ); }
+                catch(NumberFormatException nfe) {  }
             } else {
                 System.out.println("Login canceled");
             }
+        } else if( e.getSource() == menuItemDisconnect ) {
+            if(chatClient != null) {
+                chatClient.stop();
+                chatClient = null;
+            }
+        } else if( e.getSource() == tf ) {
+            if( chatClient != null )
+                try { chatClient.sendMassage(tf.getText()); }
+                catch(IOException ioe) {
+                    writeMessage("Sending error: " + ioe.getMessage());
+                }
+            tf.setText("");
         }
+    }
+
+    public void writeMessage(String message) {
+        ta.append(message+"\n");
     }
 
     public ClientGUI() {
         // Creating the Frame
         frame = new JFrame("Chat Frame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(600, 500);
 
         //Creating the MenuBar and adding components
         JMenuBar mb = new JMenuBar();
@@ -47,21 +76,21 @@ public class ClientGUI implements ActionListener {
         mb.add(m1);
         menuItemConnect = new JMenuItem("Connect to server");
         menuItemConnect.addActionListener(this);
-        JMenuItem m22 = new JMenuItem("Disconnect");
+        menuItemDisconnect = new JMenuItem("Disconnect");
+        menuItemDisconnect.addActionListener(this);
         m1.add(menuItemConnect);
-        m1.add(m22);
+        m1.add(menuItemDisconnect);
 
         //Creating the panel at bottom and adding components
         JPanel panel = new JPanel(); // the panel is not visible in output
         JLabel label = new JLabel("Enter Text");
-        JTextField tf = new JTextField(18); // displays up tp 18 characters
-        JButton send = new JButton("Send");
+        tf = new JTextField(18); // displays up tp 18 characters
+        tf.addActionListener(this);
         panel.add(label); // Components Added using Flow Layout
         panel.add(tf);
-        panel.add(send);
 
         // Text Area at the Center
-        JTextArea ta = new JTextArea();
+        ta = new JTextArea();
 
         // User list at the Center
         JPanel userPanel = new JPanel(); // the panel is not visible in output
