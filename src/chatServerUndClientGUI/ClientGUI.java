@@ -2,13 +2,42 @@ package chatServerUndClientGUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class ClientGui {
+public class ClientGUI implements ActionListener {
+    private JMenuItem menuItemConnect = null;
+    private JFrame frame;
 
     public static void main(String[] args) {
 
-        //Creating the Frame
-        JFrame frame = new JFrame("Chat Frame");
+        ClientGUI clientGui = new ClientGUI();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if( e.getSource() == menuItemConnect ) {
+            // choose server ip and port
+            JTextField ip = new JTextField();
+            JTextField port = new JPasswordField();
+            Object[] message = {
+                    "Server IP:", ip,
+                    "Port:", port
+            };
+
+            int option = JOptionPane.showConfirmDialog(frame, message, "Choose server", JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION) {
+                // ToDo : give this action actual functionality (connect to server)
+                //if (ip.getText().equals("h") && port.getText().equals("h")) {
+            } else {
+                System.out.println("Login canceled");
+            }
+        }
+    }
+
+    public ClientGUI() {
+        // Creating the Frame
+        frame = new JFrame("Chat Frame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
 
@@ -16,9 +45,10 @@ public class ClientGui {
         JMenuBar mb = new JMenuBar();
         JMenu m1 = new JMenu("Connection");
         mb.add(m1);
-        JMenuItem m11 = new JMenuItem("Connect to server");
+        menuItemConnect = new JMenuItem("Connect to server");
+        menuItemConnect.addActionListener(this);
         JMenuItem m22 = new JMenuItem("Disconnect");
-        m1.add(m11);
+        m1.add(menuItemConnect);
         m1.add(m22);
 
         //Creating the panel at bottom and adding components
