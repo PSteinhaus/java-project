@@ -4,8 +4,10 @@ import chatServerUndClient.ChatServer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class ServerGUI {
+public class ServerGUI implements ActionListener {
     private ChatServer chatServer = null;
     private JTextArea ta         = null;
 
@@ -39,27 +41,51 @@ public class ServerGUI {
         // Creating the panel at bottom and adding components
         JPanel panel = new JPanel(); // the panel is not visible in output
         JButton send = new JButton("Stop Server");
+        send.addActionListener(this);
         panel.add(send);
 
         // Text Area at the Center
         ta = new JTextArea();
+        ta.setMinimumSize(new Dimension(200, 300));
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        JScrollPane scrollTa = new JScrollPane(ta, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         // User list at the Center
+        JPanel userPanel = new JPanel(); // the panel is not visible in output
         JList list = new JList();
+        JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
+        userPanel.add(userListLabel); // Components Added using Flow Layout
+        userPanel.add(userList);
+        userPanel.setMinimumSize(new Dimension(100, 300));
+        userPanel.setPreferredSize(new Dimension(200, 300));
+
+        // Erzeugung eines JSplitPane-Objektes mit vertikaler Trennung
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitpane.setLeftComponent(userPanel);
+        splitpane.setRightComponent(scrollTa);
 
         // Adding Components to the frame.
-        frame.getContentPane().add(BorderLayout.SOUTH, panel);
-        frame.getContentPane().add(BorderLayout.EAST, ta);
-        frame.getContentPane().add(BorderLayout.WEST, userList);
+        frame.getContentPane().add(BorderLayout.CENTER, splitpane);
+        frame.getContentPane().add(BorderLayout.PAGE_END, panel);
         frame.setVisible(true);
 
         // start the server (workhorse)
         chatServer = new ChatServer(port, this);
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // stop the server
+        if(chatServer!=null) chatServer.close();
+        System.exit(0);
+    }
+
     public void writeMessage(String message) {
-        ta.append(message);
+        ta.append(message+"\n");
+        ta.setCaretPosition(ta.getDocument().getLength()); // auto-scrolling
     }
 
     public static void main(String[] args) {

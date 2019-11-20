@@ -24,6 +24,7 @@ public class ClientGUI implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if( e.getSource() == menuItemConnect ) {
+            // CONNECT TO SERVER
             // choose server ip and port
             JTextField ip = new JTextField();
             JTextField port = new JPasswordField();
@@ -46,11 +47,14 @@ public class ClientGUI implements ActionListener {
                 System.out.println("Login canceled");
             }
         } else if( e.getSource() == menuItemDisconnect ) {
+            // DISCONNECT
             if(chatClient != null) {
                 chatClient.stop();
                 chatClient = null;
+                writeMessage("DISCONNECTED FROM SERVER");
             }
         } else if( e.getSource() == tf ) {
+            // SEND MESSAGE
             if( chatClient != null )
                 try { chatClient.sendMassage(tf.getText()); }
                 catch(IOException ioe) {
@@ -62,13 +66,14 @@ public class ClientGUI implements ActionListener {
 
     public void writeMessage(String message) {
         ta.append(message+"\n");
+        ta.setCaretPosition(ta.getDocument().getLength()); // auto-scrolling
     }
 
     public ClientGUI() {
         // Creating the Frame
         frame = new JFrame("Chat Frame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 500);
+        frame.setSize(400, 400);
 
         //Creating the MenuBar and adding components
         JMenuBar mb = new JMenuBar();
@@ -84,13 +89,18 @@ public class ClientGUI implements ActionListener {
         //Creating the panel at bottom and adding components
         JPanel panel = new JPanel(); // the panel is not visible in output
         JLabel label = new JLabel("Enter Text");
-        tf = new JTextField(18); // displays up tp 18 characters
+        tf = new JTextField(20);
         tf.addActionListener(this);
         panel.add(label); // Components Added using Flow Layout
         panel.add(tf);
 
         // Text Area at the Center
         ta = new JTextArea();
+        ta.setMinimumSize(new Dimension(200, 500));
+        ta.setLineWrap(true);
+        ta.setWrapStyleWord(true);
+        ta.setEditable(false);
+        JScrollPane scrollTa = new JScrollPane(ta);
 
         // User list at the Center
         JPanel userPanel = new JPanel(); // the panel is not visible in output
@@ -99,12 +109,18 @@ public class ClientGUI implements ActionListener {
         JScrollPane userList = new JScrollPane(list);
         userPanel.add(userListLabel); // Components Added using Flow Layout
         userPanel.add(userList);
+        userPanel.setMinimumSize(new Dimension(110, 500));
+
+        // Erzeugung eines JSplitPane-Objektes mit vertikaler Trennung
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitpane.setLeftComponent(userPanel);
+        splitpane.setRightComponent(scrollTa);
 
         //Adding Components to the frame.
-        frame.getContentPane().add(BorderLayout.SOUTH, panel);
-        frame.getContentPane().add(BorderLayout.NORTH, mb);
-        frame.getContentPane().add(BorderLayout.EAST, ta);
-        frame.getContentPane().add(BorderLayout.WEST, userPanel);
+        frame.getContentPane().add(BorderLayout.PAGE_START, mb);
+        frame.getContentPane().add(BorderLayout.CENTER, splitpane);
+        frame.getContentPane().add(BorderLayout.PAGE_END, panel);
+
         frame.setVisible(true);
     }
 }

@@ -59,11 +59,13 @@ public class ChatServer implements Runnable {
       return -1;
    }
 
-   private void close() {
+   public void close() {
       writeServerOutput("Closing ...");
       for(int i=0; i<clients.length; i++) {
-         if(clients[i]!=null)
+         if(clients[i]!=null) {
+            clients[i].send("Server closing...");
             clients[i].stopThread();
+         }
       }
       try {
          // save known users
@@ -105,7 +107,7 @@ public class ChatServer implements Runnable {
 
    public void writeServerOutput(String input) {
       if(gui!=null)
-         gui.writeMessage(input+"\n");
+         gui.writeMessage(input);
       else
          System.out.println(input);
    }

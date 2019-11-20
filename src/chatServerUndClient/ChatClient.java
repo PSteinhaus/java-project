@@ -11,20 +11,25 @@ public class ChatClient implements Runnable {
    private DataInputStream  console   = null;
    private DataOutputStream streamOut = null;
    private ChatClientThread clientThread    = null;
+   private ClientGUI gui              = null;
 
    public ChatClient(String serverName, int serverPort, ClientGUI gui) {
+      this.gui = gui;
       // setup
-      System.out.println("Establishing connection. Please wait ...");
+      writeChatOutput("Establishing connection. Please wait ...");
       try {
          socket = new Socket(serverName, serverPort);
          System.out.println("Connected: " + socket);
          start(gui);
       }
       catch(UnknownHostException uhe) {
-         System.out.println("Host unknown: " + uhe.getMessage());
+         writeChatOutput("Host unknown: " + uhe.getMessage());
       }
       catch(IOException ioe) {
-         System.out.println("Unexpected exception: " + ioe.getMessage());
+         writeChatOutput("Unexpected exception: " + ioe.getMessage());
+      }
+      catch(IllegalArgumentException iae) {
+         writeChatOutput("Illegal argument: " + iae.getMessage());
       }
    }
 
@@ -35,7 +40,7 @@ public class ChatClient implements Runnable {
             sendMassage(scan.nextLine());
          }
          catch(IOException ioe) {
-            System.out.println("Sending error: " + ioe.getMessage());
+            writeChatOutput("Sending error: " + ioe.getMessage());
             stop();
          }
       }
@@ -44,6 +49,13 @@ public class ChatClient implements Runnable {
    public void sendMassage (String s) throws IOException {
       streamOut.writeUTF(s);
       streamOut.flush();
+   }
+
+   public void writeChatOutput(String input) {
+      if(gui!=null)
+         gui.writeMessage(input);
+      else
+         System.out.println(input);
    }
 
    private void start(ClientGUI gui) throws IOException {
@@ -64,12 +76,10 @@ public class ChatClient implements Runnable {
          if (console   != null)  console.close();
          if (streamOut != null)  streamOut.close();
          if (socket    != null)  socket.close();
+         if (clientThread != null) clientThread.stopThread();
       }
       catch(IOException ioe) {
          System.out.println("Error closing ...");
-      }
-      finally {
-         clientThread.stopThread();
       }
    }
 
