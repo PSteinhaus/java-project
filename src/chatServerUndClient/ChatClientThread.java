@@ -43,7 +43,7 @@ public class ChatClientThread extends Thread {
    public void run() {
       while (!stopped) {
          try {
-            handle(streamIn.readUTF());
+            handle(streamIn.readInt());
          }
          catch(IOException ioe) {
             System.out.println("Listening error: " + ioe.getMessage());
@@ -52,17 +52,52 @@ public class ChatClientThread extends Thread {
       }
    }
 
-   public void handle(String msg) {
-      if( gui == null ) {
-         if (msg.equals(".bye")) {
-            System.out.println("Good bye. Press RETURN to exit ...");
-            client.stop();
-         }
-         else System.out.println(msg);
+   private void handle(int signal) {
+      switch(signal) {
+         case 0:  // just a normal message
+            String msg = "";
+            try {
+               msg = streamIn.readUTF();
+            }
+            catch(IOException ioe) {
+               System.out.println("Listening error: " + ioe.getMessage());
+               client.stop();
+            }
+            if( gui == null ) {
+               if (msg.equals("!bye")) {
+                  System.out.println("Good bye. Press RETURN to exit ...");
+                  client.stop();
+               }
+               else System.out.println(msg);
+            }
+            else {
+               gui.writeMessage(msg);
+            }
+            break;
+
+         case 1:  // the user-list
+            String[] userlist = null;
+            try {
+               // first get the number of bytes to read
+               int numberOfBytes = streamIn.readInt();
+               byte[] asBytes = new byte[numberOfBytes];
+               streamIn.read(asBytes, 0, numberOfBytes);
+               userlist = (String[]) Helper.deserialize(asBytes);
+            }
+            catch(IOException ioe) {
+               System.out.println("Listening error: " + ioe.getMessage());
+               client.stop();
+            }
+            catch (ClassNotFoundException cnfe) {
+               System.out.println(cnfe);
+            }
+            if( gui != null ) {
+               // if there is a GUI hand the list over to it
+               gui.updateUserlist( userlist );
+            }
+            break;
       }
-      else {
-         gui.writeMessage(msg);
-      }
+
    }
 
 }

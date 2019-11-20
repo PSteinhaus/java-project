@@ -1,23 +1,28 @@
 package chatServerUndClient;
 
+import chatServerUndClientGUI.ServerGUI;
+
 import java.net.*;
 import java.io.*;
 
 public class ChatServerThread extends Thread {
    private Socket           socket    = null;
    private ChatServer       server    = null;
+   private ServerGUI        gui       = null;
    private User             user      = null;
    private DataInputStream  streamIn  = null;
    private DataOutputStream streamOut = null;
    private boolean          stopped   = false;
 
-   public ChatServerThread(ChatServer _server, Socket _socket) {
+    ChatServerThread(ChatServer _server, Socket _socket, ServerGUI _gui) {
       server = _server;  
       socket = _socket;
+      gui    = _gui;
    }
 
-   public void send(String msg) {
+    void send(String msg) {
       try {
+         streamOut.writeInt(0);  // signals that the following is a message
          streamOut.writeUTF(msg);
          streamOut.flush();
          server.writeServerOutput(msg);
@@ -29,7 +34,7 @@ public class ChatServerThread extends Thread {
       }
    }
 
-   public void stopThread() {
+    void stopThread() {
       try {
          stopped = true;
          if (socket != null)    socket.close();
@@ -41,11 +46,23 @@ public class ChatServerThread extends Thread {
       }
    }
 
-   public String getUsername() {
+    String getUsername() {
       if (user!=null)
          return user.getName();
-      else
-         return null;
+
+      return null;
+   }
+
+   String readString() {
+      try {
+         return streamIn.readUTF();
+      }
+      catch(IOException ioe) {
+         server.writeServerOutput("ERROR reading: " + ioe.getMessage());
+         server.remove(this);
+         stopThread();
+      }
+      return null;
    }
 
    public void run() {
@@ -55,7 +72,7 @@ public class ChatServerThread extends Thread {
       // handle further input
       while (!stopped) {
          try {
-            server.handle(this, streamIn.readUTF());
+            server.handle(this, streamIn.readInt());
          }
          catch(IOException ioe) {
             server.writeServerOutput("ERROR reading: " + ioe.getMessage());
@@ -71,9 +88,13 @@ public class ChatServerThread extends Thread {
          String feedback, username = null, password = null;
          try {
             send("Username: ");
-            username = streamIn.readUTF();
+            if(streamIn.readInt()==0)  // check if the next thing is really a message
+               username = streamIn.readUTF();
+            else continue;
             send("Password: ");
-            password = streamIn.readUTF();
+            if(streamIn.readInt()==0) // same
+               password = streamIn.readUTF();
+            else continue;
          } catch(IOException ioe) {
             server.writeServerOutput("Error logging in: " + ioe);
          }
@@ -98,14 +119,33 @@ public class ChatServerThread extends Thread {
          send(feedback);
       }
       // tell him who's online
-      server.handle(this,"!online");
+      if( gui == null ) {
+         server.handleMessage(this, "!online");
+      }
+      server.addToUserlist(getUsername());
+      server.sendUserlist();
       // tell the others that someone new has logged on
-      server.handle(this,"!joined");
+      server.handleMessage(this,"!joined");
    }
 
-   public void open() throws IOException {
+    void open() throws IOException {
       streamIn = new DataInputStream( new BufferedInputStream(socket.getInputStream()) );
       streamOut = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+   }
+
+    void sendUserlist(String[] userlist) {
+      try {
+         streamOut.writeInt(1);  // signals that the following are a number of bytes and then a userlist
+         byte[] asBytes = Helper.serialize(userlist);
+         streamOut.writeInt( asBytes.length );  // length of the byteArray of the list
+         streamOut.write( asBytes );
+         streamOut.flush();
+      }
+      catch(IOException ioe) {
+         System.out.println(getUsername() + " ERROR sending: " + ioe.getMessage());
+         server.remove(this);
+         stopThread();
+      }
    }
 
 }

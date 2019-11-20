@@ -12,9 +12,10 @@ public class ChatServer implements Runnable {
    private ServerSocket server = null;
    private Thread       thread = null;
    private int clientCount = 0;
-   private Map<String,User> knownUsers = new HashMap<String,User>();
+   private Map<String,User> knownUsers = Collections.unmodifiableMap(new HashMap<String, User>());
    private final Path knownUsersPath = Paths.get("users.data");
    private ServerGUI gui = null;
+   private String[] userList = new String[0];
 
    public ChatServer(int port, ServerGUI _gui) {
       gui = _gui;
@@ -59,6 +60,36 @@ public class ChatServer implements Runnable {
       return -1;
    }
 
+   void addToUserlist(String name) {
+      String[] newUserList = new String[userList.length+1];
+      System.arraycopy(userList, 0, newUserList, 0, newUserList.length-1);
+      newUserList[newUserList.length-1] = name;
+      userList = newUserList;
+   }
+
+   private void removeFromUserlist(String username) {
+      for(int i=0; i<userList.length; i++) {
+         if( userList[i].equals(username) ) {
+            if (userList.length - 1 - i >= 0) System.arraycopy(userList, i + 1, userList, i, userList.length - 1 - i);
+            break;
+         }
+      }
+      //String[] oldUserList = copy(userList);
+      userList = Arrays.copyOf(userList, userList.length-1);
+      //System.arraycopy(oldUserList, 0, userList, 0, userList.length-1);
+   }
+
+    void sendUserlist() {
+      for (ChatServerThread client : clients) {
+         if (client != null) {
+            client.sendUserlist(userList);
+         }
+      }
+      // also tell the server-GUI if you have one
+      if(gui != null)
+         gui.updateUserlist(userList);
+   }
+
    public void close() {
       writeServerOutput("Closing ...");
       for(int i=0; i<clients.length; i++) {
@@ -76,50 +107,67 @@ public class ChatServer implements Runnable {
       System.exit(0);
    }
 
-   public synchronized void handle(ChatServerThread userThread, String input) {
-      if (input.equals("!bye")) {
-         // remove this user
-         userThread.send("byebye");
-         remove(userThread);
-      } else if (input.equals("!online")) {
-         // tell THIS USER who's online
-         userThread.send("online now:");
-         for (int i = 0; i < clientCount; i++) {
-            String name = clients[i].getUsername();
-            if (name!=null)
-               userThread.send(name);
-         }
-      } else if (input.equals("!joined")) {
-         // tell the others that you're online now
-         for (int i = 0; i < clientCount; i++)
-            clients[i].send(userThread.getUsername() + " is now online.");
-      }
-      else {
-         for (int i = 0; i < clientCount; i++)
-            clients[i].send(userThread.getUsername() + ": " + input);
+   void handleMessage(ChatServerThread userThread, String input) {
+      switch (input) {
+         case "!bye":
+            // remove this user
+            userThread.send("byebye");
+            remove(userThread);
+            break;
+         case "!online":
+            // tell THIS USER who's online
+            userThread.send("online now:");
+            for (int i = 0; i < clientCount; i++) {
+               String name = clients[i].getUsername();
+               if (name != null)
+                  userThread.send(name);
+            }
+            break;
+         case "!joined":
+            // tell the others that you're online now
+            for (int i = 0; i < clientCount; i++)
+               clients[i].send(userThread.getUsername() + " is now online.");
+            break;
+         default:
+            for (int i = 0; i < clientCount; i++)
+               clients[i].send(userThread.getUsername() + ": " + input);
+            break;
       }
    }
 
-   public void handleServerControl(String input) {
+    synchronized void handle(ChatServerThread userThread, int signal) {
+      switch(signal) {
+
+         case 0:  // just a normal message
+            handleMessage(userThread, userThread.readString());
+            break;
+
+         case 1:  // the user-list (should never happen, because only the server itself creates and sends these
+            break;
+      }
+
+   }
+
+   private void handleServerControl(String input) {
       if (input.equals("stop")) 
          close();
    }
 
-   public void writeServerOutput(String input) {
+    void writeServerOutput(String input) {
       if(gui!=null)
          gui.writeMessage(input);
       else
          System.out.println(input);
    }
 
-   public boolean running() {
+   private boolean running() {
       return thread != null;
    }
 
-   public synchronized void addThread(Socket socket) {
+   private synchronized void addThread(Socket socket) {
       if (clientCount < clients.length) {
          writeServerOutput("Client accepted: " + socket);
-         clients[clientCount] = new ChatServerThread(this, socket);
+         clients[clientCount] = new ChatServerThread(this, socket, gui);
          try {
             clients[clientCount].open();
             clients[clientCount].start();
@@ -133,20 +181,23 @@ public class ChatServer implements Runnable {
          writeServerOutput("Client refused: maximum " + clients.length + " reached.");
    }
 
-   public synchronized void remove(ChatServerThread userThread) {
+    synchronized void remove(ChatServerThread userThread) {
       int pos = findClient(userThread);
       if (pos >= 0) {
          ChatServerThread toTerminate = clients[pos];
          writeServerOutput("Removing client thread at " + pos);
          if (pos < clientCount-1)
-            for (int i = pos+1; i < clientCount; i++)
-               clients[i-1] = clients[i];
+            if (clientCount - pos + 1 >= 0)
+               System.arraycopy(clients, pos + 1, clients, pos, clientCount - pos -1);
+         clients[clientCount-1] = null;
          clientCount--;
          toTerminate.stopThread();
       }
       // tell the others
       for (int i = 0; i < clientCount; i++)
-         clients[i].send(userThread.getUsername() + " has quit.");   
+         clients[i].send(userThread.getUsername() + " has quit.");
+      removeFromUserlist(userThread.getUsername());
+      sendUserlist();
    }
 
    public static void main(String[] args) {
@@ -163,11 +214,11 @@ public class ChatServer implements Runnable {
 
    // USER STUFF
 
-   public User getUser(String username) {
+    User getUser(String username) {
       return knownUsers.get(username);
    }
 
-   public void addNewUser(User user) {
+    void addNewUser(User user) {
       knownUsers.put(user.getName(), user);
    }
 

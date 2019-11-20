@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 public class ServerGUI implements ActionListener {
     private ChatServer chatServer = null;
     private JTextArea ta         = null;
+    private JList<String> list = null;
 
     private ServerGUI() {
         // Creating the Frame
@@ -54,11 +55,11 @@ public class ServerGUI implements ActionListener {
 
         // User list at the Center
         JPanel userPanel = new JPanel(); // the panel is not visible in output
-        JList list = new JList();
+        list = new JList<>();
         JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
-        userPanel.add(userListLabel); // Components Added using Flow Layout
-        userPanel.add(userList);
+        userPanel.add(userListLabel, BorderLayout.PAGE_START);
+        userPanel.add(userList, BorderLayout.CENTER);
         userPanel.setMinimumSize(new Dimension(100, 300));
         userPanel.setPreferredSize(new Dimension(200, 300));
 
@@ -81,6 +82,10 @@ public class ServerGUI implements ActionListener {
         // stop the server
         if(chatServer!=null) chatServer.close();
         System.exit(0);
+    }
+
+    public void updateUserlist( String[] listData ) {
+        list.setListData(listData);
     }
 
     public void writeMessage(String message) {

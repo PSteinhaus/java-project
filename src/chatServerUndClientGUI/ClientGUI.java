@@ -15,9 +15,9 @@ public class ClientGUI implements ActionListener {
     private JTextArea ta = null;
     private JFrame frame;
     private ChatClient chatClient = null;
+    private JList<String> list = null;
 
     public static void main(String[] args) {
-
         ClientGUI clientGui = new ClientGUI();
     }
 
@@ -39,6 +39,7 @@ public class ClientGUI implements ActionListener {
                 if(chatClient != null) {
                     chatClient.stop();
                     chatClient = null;
+                    list.setListData(new String[0]);
                 }
                 // start the ChatClient (workhorse)
                 try { chatClient = new ChatClient( ip.getText(), Integer.parseInt(port.getText()), this ); }
@@ -51,6 +52,7 @@ public class ClientGUI implements ActionListener {
             if(chatClient != null) {
                 chatClient.stop();
                 chatClient = null;
+                list.setListData(new String[0]);
                 writeMessage("DISCONNECTED FROM SERVER");
             }
         } else if( e.getSource() == tf ) {
@@ -69,7 +71,11 @@ public class ClientGUI implements ActionListener {
         ta.setCaretPosition(ta.getDocument().getLength()); // auto-scrolling
     }
 
-    public ClientGUI() {
+    public void updateUserlist( String[] listData ) {
+        list.setListData(listData);
+    }
+
+    private ClientGUI() {
         // Creating the Frame
         frame = new JFrame("Chat Frame");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,13 +108,14 @@ public class ClientGUI implements ActionListener {
         ta.setEditable(false);
         JScrollPane scrollTa = new JScrollPane(ta);
 
-        // User list at the Center
+        // User list at the left
         JPanel userPanel = new JPanel(); // the panel is not visible in output
-        JList list = new JList();
+        list = new JList<>(new String[0]);
+        list.setLayoutOrientation(JList.VERTICAL);
         JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
-        userPanel.add(userListLabel); // Components Added using Flow Layout
-        userPanel.add(userList);
+        userPanel.add(userListLabel, BorderLayout.PAGE_START);
+        userPanel.add(userList, BorderLayout.CENTER);
         userPanel.setMinimumSize(new Dimension(110, 500));
 
         // Erzeugung eines JSplitPane-Objektes mit vertikaler Trennung

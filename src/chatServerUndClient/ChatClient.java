@@ -47,6 +47,7 @@ public class ChatClient implements Runnable {
    }
 
    public void sendMassage (String s) throws IOException {
+      streamOut.writeInt(0);  // signals that the following is a message
       streamOut.writeUTF(s);
       streamOut.flush();
    }
