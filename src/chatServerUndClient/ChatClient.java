@@ -44,6 +44,10 @@ public class ChatClient implements Runnable {
             stop();
          }
       }
+      // tell the gui you're dead
+      if(gui!=null) {
+         gui.killClient(false);
+      }
    }
 
    public void sendMassage (String s) throws IOException {
@@ -52,7 +56,7 @@ public class ChatClient implements Runnable {
       streamOut.flush();
    }
 
-   public void writeChatOutput(String input) {
+   private void writeChatOutput(String input) {
       if(gui!=null)
          gui.writeMessage(input);
       else

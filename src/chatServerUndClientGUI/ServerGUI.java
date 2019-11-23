@@ -56,12 +56,15 @@ public class ServerGUI implements ActionListener {
         // User list at the Center
         JPanel userPanel = new JPanel(); // the panel is not visible in output
         list = new JList<>();
+        list.setFixedCellWidth(100);
+        DefaultListCellRenderer renderer = (DefaultListCellRenderer) list.getCellRenderer();
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
         JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
-        userPanel.add(userListLabel, BorderLayout.PAGE_START);
-        userPanel.add(userList, BorderLayout.CENTER);
+        userPanel.add(userListLabel, BorderLayout.BEFORE_FIRST_LINE);
+        userPanel.add(userList, BorderLayout.AFTER_LINE_ENDS);
         userPanel.setMinimumSize(new Dimension(100, 300));
-        userPanel.setPreferredSize(new Dimension(200, 300));
+        userPanel.setPreferredSize(new Dimension(100, 300));
 
         // Erzeugung eines JSplitPane-Objektes mit vertikaler Trennung
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);

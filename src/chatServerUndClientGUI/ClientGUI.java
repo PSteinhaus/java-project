@@ -36,11 +36,7 @@ public class ClientGUI implements ActionListener {
             int option = JOptionPane.showConfirmDialog(frame, message, "Choose server", JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
                 // first disconnect
-                if(chatClient != null) {
-                    chatClient.stop();
-                    chatClient = null;
-                    list.setListData(new String[0]);
-                }
+                killClient(true);
                 // start the ChatClient (workhorse)
                 try { chatClient = new ChatClient( ip.getText(), Integer.parseInt(port.getText()), this ); }
                 catch(NumberFormatException nfe) {  }
@@ -49,12 +45,7 @@ public class ClientGUI implements ActionListener {
             }
         } else if( e.getSource() == menuItemDisconnect ) {
             // DISCONNECT
-            if(chatClient != null) {
-                chatClient.stop();
-                chatClient = null;
-                list.setListData(new String[0]);
-                writeMessage("DISCONNECTED FROM SERVER");
-            }
+            killClient(true);
         } else if( e.getSource() == tf ) {
             // SEND MESSAGE
             if( chatClient != null )
@@ -69,6 +60,16 @@ public class ClientGUI implements ActionListener {
     public void writeMessage(String message) {
         ta.append(message+"\n");
         ta.setCaretPosition(ta.getDocument().getLength()); // auto-scrolling
+    }
+
+    public void killClient(boolean stopFirst) {
+        if(chatClient!=null) {
+            if (stopFirst)
+                chatClient.stop();
+            chatClient = null;
+            list.setListData(new String[0]);
+            writeMessage("Disconnected");
+        }
     }
 
     public void updateUserlist( String[] listData ) {
@@ -112,11 +113,15 @@ public class ClientGUI implements ActionListener {
         JPanel userPanel = new JPanel(); // the panel is not visible in output
         list = new JList<>(new String[0]);
         list.setLayoutOrientation(JList.VERTICAL);
+        list.setFixedCellWidth(100);
+        DefaultListCellRenderer renderer = (DefaultListCellRenderer) list.getCellRenderer();
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
         JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
         userPanel.add(userListLabel, BorderLayout.PAGE_START);
         userPanel.add(userList, BorderLayout.CENTER);
-        userPanel.setMinimumSize(new Dimension(110, 500));
+        userPanel.setMinimumSize(new Dimension(100, 500));
+        userPanel.setPreferredSize(new Dimension(100, 500));
 
         // Erzeugung eines JSplitPane-Objektes mit vertikaler Trennung
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);

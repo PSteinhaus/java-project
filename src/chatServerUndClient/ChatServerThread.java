@@ -68,7 +68,12 @@ public class ChatServerThread extends Thread {
    public void run() {
       server.writeServerOutput("Server Thread " + socket.getPort() + " running.");
       // login user
-      login();
+      if (!login()) {
+          server.writeServerOutput("ERROR during Login");
+          server.remove(this);
+          stopThread();
+          return;
+      };
       // handle further input
       while (!stopped) {
          try {
@@ -82,9 +87,10 @@ public class ChatServerThread extends Thread {
       }
    }
 
-   private void login() {
-      boolean accepted = false;
-      while(!accepted) {
+   private boolean login() {    // return whether the login was successful
+       boolean accepted = false;
+       User _user = null;
+       while(!accepted) {
          String feedback, username = null, password = null;
          try {
             send("Username: ");
@@ -97,35 +103,44 @@ public class ChatServerThread extends Thread {
             else continue;
          } catch(IOException ioe) {
             server.writeServerOutput("Error logging in: " + ioe);
+            return false;
          }
-         user = server.getUser(username);
-         if(user != null) {
-            if(user.tryPassword(password)) {
-               // accept user
-               feedback = "Welcome back "+username+".";
-               accepted = true;
+         _user = server.getUser(username);
+         if(_user != null) {
+            if(_user.tryPassword(password)) {
+                if(!server.isOnline(username)) {
+                    // accept user
+                    feedback = "Welcome back " + username + ".";
+                    accepted = true;
+                } else {
+                    // user is already online
+                    feedback = "This user is already logged on.";
+                }
             } else {
                // password wrong
                feedback = "Wrong password, please try again.";
             }
          } else {
             // new user
-            user = new User(username,password);
-            server.addNewUser(user);
+            _user = new User(username,password);
+            server.addNewUser(_user);
             feedback = "Welcome "+username+".";
             accepted = true;
          }
          // feedback for user
          send(feedback);
-      }
-      // tell him who's online
-      if( gui == null ) {
-         server.handleMessage(this, "!online");
-      }
-      server.addToUserlist(getUsername());
-      server.sendUserlist();
-      // tell the others that someone new has logged on
-      server.handleMessage(this,"!joined");
+       }
+       // once he has been accepted set the user of this thread
+       this.user = _user;
+       // tell him who's online
+       if( gui == null ) {
+           server.handleMessage(this, "!online");
+       }
+       server.addToUserlist(getUsername());
+       server.sendUserlist();
+       // tell the others that someone new has logged on
+       server.handleMessage(this,"!joined");
+       return true;
    }
 
     void open() throws IOException {

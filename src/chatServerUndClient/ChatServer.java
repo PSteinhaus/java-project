@@ -135,7 +135,7 @@ public class ChatServer implements Runnable {
       }
    }
 
-    synchronized void handle(ChatServerThread userThread, int signal) {
+   void handle(ChatServerThread userThread, int signal) {
       switch(signal) {
 
          case 0:  // just a normal message
@@ -153,7 +153,7 @@ public class ChatServer implements Runnable {
          close();
    }
 
-    void writeServerOutput(String input) {
+    synchronized void writeServerOutput(String input) {
       if(gui!=null)
          gui.writeMessage(input);
       else
@@ -194,10 +194,12 @@ public class ChatServer implements Runnable {
          toTerminate.stopThread();
       }
       // tell the others
-      for (int i = 0; i < clientCount; i++)
-         clients[i].send(userThread.getUsername() + " has quit.");
-      removeFromUserlist(userThread.getUsername());
-      sendUserlist();
+       if(userThread.getUsername()!=null) {
+          for (int i = 0; i < clientCount; i++)
+             clients[i].send(userThread.getUsername() + " has quit.");
+          removeFromUserlist(userThread.getUsername());
+          sendUserlist();
+       }
    }
 
    public static void main(String[] args) {
@@ -222,4 +224,10 @@ public class ChatServer implements Runnable {
       knownUsers.put(user.getName(), user);
    }
 
+   boolean isOnline(String username) {
+      for (String name: userList) {
+         if( username.equals(name) ) return true;
+      }
+      return false;
+   }
 }
