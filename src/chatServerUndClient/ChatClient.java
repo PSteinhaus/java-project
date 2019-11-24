@@ -91,6 +91,8 @@ public class ChatClient implements Runnable {
          thread = null;
       }
       try {
+         if (hostedGameId != -1) stopHosting();
+         if (gui       != null)  gui.killClient(false);
          if (console   != null)  console.close();
          if (streamOut != null)  streamOut.close();
          if (socket    != null)  socket.close();
@@ -114,6 +116,9 @@ public class ChatClient implements Runnable {
    }
 
    public void hostGame(String option) {
+      // first stop hosting, if you're already hosting
+      if(hostedGameId!=-1)
+         stopHosting();
       hostedGame = option;
       // tell the server to register a new game session waiting for players
       try {

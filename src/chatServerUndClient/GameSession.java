@@ -13,11 +13,24 @@ public class GameSession {
         id = _id;
     }
 
+    public boolean hasPlayer(String playerName) {
+        for (int i=0; i<usersJoined.length; i++)
+            if(usersJoined[i]!=null)
+                if(usersJoined[i].getUsername().equals(playerName)) {
+                    return true;
+                }
+        return false;
+    }
+
     int getId() { return id; }
 
-    String getNameOfGame() { return nameOfGame; }
+    public String getHost() {
+        return usersJoined[0].getUsername();
+    }
 
-    boolean addPlayer(ChatServerThread playerThread) {
+    public String getNameOfGame() { return nameOfGame; }
+
+    synchronized boolean addPlayer(ChatServerThread playerThread) {
         for (int i=0; i<usersJoined.length; i++)
             if(usersJoined[i]==null) {
                 usersJoined[i] = playerThread;
@@ -32,7 +45,9 @@ public class GameSession {
         return false;
     }
 
-    void removePlayer(ChatServerThread playerThread) {
+    synchronized boolean removePlayer(ChatServerThread playerThread) {  // returns true if the host is removed
+        boolean stopAtEnd = false;
+        if(usersJoined[0] == playerThread) stopAtEnd = true; // if it's the host disband the whole session
         for (int i=0; i<usersJoined.length; i++)
             if(usersJoined[i] == playerThread) {
                 usersJoined[i] = null;
@@ -42,8 +57,13 @@ public class GameSession {
                     if(usersJoined[j]!=null) {
                         usersJoined[j].sendLeave(playerThread.getUsername());
                     }
-                return;
+                break;
             }
+        if(stopAtEnd) {
+            stop();
+            return true;
+        }
+        return false;
     }
 
     void startGame() {
@@ -60,6 +80,7 @@ public class GameSession {
     void stop() {
         // tell all users that the session is now closed
         for (ChatServerThread thread: usersJoined) {
+            if(thread!=null)
             thread.joinedSessionClosed();
         }
         // TODO: stop the game if already launched

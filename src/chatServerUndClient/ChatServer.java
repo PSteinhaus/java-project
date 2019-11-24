@@ -174,6 +174,7 @@ public class ChatServer implements Runnable {
             if (accepted) {
                System.out.println("accepted into group");
                userThread.acceptPlayer(id);
+               if(gui!=null) gui.updateSessionList();
             } else {
                System.out.println("declined");
                userThread.declinePlayer();
@@ -183,6 +184,7 @@ public class ChatServer implements Runnable {
 
          case 6: // a user wants to disband a game-session he hosts
          {
+            System.out.println("removing");
             int id = userThread.readInt();
             removeGameSession(id);
             break;
@@ -197,11 +199,6 @@ public class ChatServer implements Runnable {
             invitedThread.invitePlayer(userThread.getUsername(),getGameSession(gameId).getNameOfGame() ,gameId);
          }
 
-         case 8: // someone wants to know if a user is part of his gameSession
-         {
-
-         }
-
       }
 
    }
@@ -210,17 +207,16 @@ public class ChatServer implements Runnable {
       int id = ++lastGameId;
       GameSession newSession = new GameSession(nameOfGame,numberOfPlayers,id);
       sessions.add(newSession);
-      if(gui!=null) {
-         // TODO: tell the GUI that a new game is hosted
-         gui.addSession(newSession);
-      }
       return id;
    }
+
+   public ArrayList<GameSession> getGameSessions() { return sessions; }
 
    private void removeGameSession(int id) {
       GameSession session = getGameSession(id);
       session.stop();
       sessions.remove(session);
+      if(gui!=null) gui.updateSessionList();
    }
 
    private GameSession getGameSession(int id) {
@@ -270,18 +266,21 @@ public class ChatServer implements Runnable {
     synchronized void remove(ChatServerThread userThread) {
       int pos = findClient(userThread);
       if (pos >= 0) {
-         ChatServerThread toTerminate = clients[pos];
          writeServerOutput("Removing client thread at " + pos);
          if (pos < clientCount-1)
             if (clientCount - pos + 1 >= 0)
                System.arraycopy(clients, pos + 1, clients, pos, clientCount - pos -1);
          clients[clientCount-1] = null;
          clientCount--;
-         toTerminate.stopThread();
       }
       // also remove the user from his game session if he has one
        for (GameSession session: sessions) {
-          session.removePlayer(userThread);
+          if(session.hasPlayer(userThread.getUsername()))
+             if(session.removePlayer(userThread)) // if it's the host
+             {
+                removeGameSession(session.getId());
+                break;
+             }
        }
       // tell the others
        if(userThread.getUsername()!=null) {
@@ -290,6 +289,7 @@ public class ChatServer implements Runnable {
           removeFromUserlist(userThread.getUsername());
           sendUserlist();
        }
+       userThread.stopThread();
    }
 
    public static void main(String[] args) {

@@ -160,10 +160,10 @@ public class ChatClientThread extends Thread {
             break;
          }
 
-         case 9: // a new user joined your game session
+         case 9: // a user left your game session
          {
             try {
-               String leaving = streamIn.readUTF();      // who came
+               String leaving = streamIn.readUTF();      // who left
                client.removePlayerFromList(leaving);
                client.writeChatOutput(leaving+" left the game.");
             } catch (IOException ioe) {

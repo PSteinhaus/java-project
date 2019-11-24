@@ -12,13 +12,13 @@ public class ServerGUI implements ActionListener {
     private ChatServer chatServer = null;
     private JTextArea ta         = null;
     private JList<String> list = null;
-    private JList<String> sessionList = null;
+    private DefaultListModel<String> listModel = null;
 
     private ServerGUI() {
         // Creating the Frame
         JFrame frame = new JFrame("Server");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 600);
+        frame.setSize(700, 600);
 
         Integer port = null;
         while(port == null) {
@@ -58,28 +58,30 @@ public class ServerGUI implements ActionListener {
         // User list at the Center
         JPanel userPanel = new JPanel(); // the panel is not visible in output
         list = new JList<>();
-        list.setFixedCellWidth(100);
+        list.setFixedCellWidth(200);
         DefaultListCellRenderer renderer = (DefaultListCellRenderer) list.getCellRenderer();
         renderer.setHorizontalAlignment(SwingConstants.CENTER);
         JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
         userPanel.add(userListLabel, BorderLayout.BEFORE_FIRST_LINE);
         userPanel.add(userList, BorderLayout.AFTER_LINE_ENDS);
-        userPanel.setMinimumSize(new Dimension(100, 200));
-        userPanel.setPreferredSize(new Dimension(100, 200));
+        userPanel.setMinimumSize(new Dimension(200, 200));
+        userPanel.setPreferredSize(new Dimension(200, 200));
 
         // session list below
         JPanel sessionPanel = new JPanel(); // the panel is not visible in output
-        sessionList = new JList<>();
-        sessionList.setFixedCellWidth(100);
+        listModel = new DefaultListModel<String>();
+        JList<String> sessionList = new JList<String>(listModel);
+        //sessionList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        sessionList.setFixedCellWidth(200);
         DefaultListCellRenderer sessionRenderer = (DefaultListCellRenderer) sessionList.getCellRenderer();
         renderer.setHorizontalAlignment(SwingConstants.CENTER);
         JLabel sessionListLabel = new JLabel("Hosted games:");
         JScrollPane scrollingSessionList = new JScrollPane(sessionList);
         sessionPanel.add(sessionListLabel, BorderLayout.BEFORE_FIRST_LINE);
         sessionPanel.add(scrollingSessionList, BorderLayout.AFTER_LINE_ENDS);
-        sessionPanel.setMinimumSize(new Dimension(100, 200));
-        sessionPanel.setPreferredSize(new Dimension(100, 200));
+        sessionPanel.setMinimumSize(new Dimension(200, 200));
+        sessionPanel.setPreferredSize(new Dimension(200, 200));
 
         // Erzeugung eines JSplitPane-Objektes mit hotizontaler Trennung
         JSplitPane splitpaneLeft = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -107,6 +109,17 @@ public class ServerGUI implements ActionListener {
         System.exit(0);
     }
 
+    public void updateSessionList() {
+        System.out.println("updating");
+        // update the list of hosted games
+        listModel.removeAllElements();
+        // add sessions one after another
+        for (GameSession session: chatServer.getGameSessions()) {
+            System.out.println("session added");
+            listModel.addElement(session.getNameOfGame()+", hosted by "+session.getHost());
+        }
+    }
+
     public void updateUserlist( String[] listData ) {
         list.setListData(listData);
     }
@@ -114,10 +127,6 @@ public class ServerGUI implements ActionListener {
     public void writeMessage(String message) {
         ta.append(message+"\n");
         ta.setCaretPosition(ta.getDocument().getLength()); // auto-scrolling
-    }
-
-    public void addSession(GameSession session) {
-
     }
 
     public static void main(String[] args) {
