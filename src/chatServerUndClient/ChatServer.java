@@ -16,6 +16,8 @@ public class ChatServer implements Runnable {
    private final Path knownUsersPath = Paths.get("users.data");
    private ServerGUI gui = null;
    private String[] userList = new String[0];
+   private ArrayList<GameSession> sessions = new ArrayList<>(20); // Create an ArrayList object
+   private int lastGameId = 0;
 
    public ChatServer(int port, ServerGUI _gui) {
       gui = _gui;
@@ -60,6 +62,13 @@ public class ChatServer implements Runnable {
       return -1;
    }
 
+   private ChatServerThread findClientThread(String username) {
+      for (int i = 0; i < clientCount; i++)
+         if (clients[i] != null && clients[i].getUsername().equals(username) )
+               return clients[i];
+      return null;
+   }
+
    void addToUserlist(String name) {
       String[] newUserList = new String[userList.length+1];
       System.arraycopy(userList, 0, newUserList, 0, newUserList.length-1);
@@ -75,7 +84,9 @@ public class ChatServer implements Runnable {
          }
       }
       //String[] oldUserList = copy(userList);
-      userList = Arrays.copyOf(userList, userList.length-1);
+      int newLength = userList.length-1;
+      if(newLength<0) newLength=0;        // dirty fix
+      userList = Arrays.copyOf(userList, newLength);
       //System.arraycopy(oldUserList, 0, userList, 0, userList.length-1);
    }
 
@@ -142,10 +153,85 @@ public class ChatServer implements Runnable {
             handleMessage(userThread, userThread.readString());
             break;
 
-         case 1:  // the user-list (should never happen, because only the server itself creates and sends these
+         case 1:  // the user-list (should never happen, because only the server itself creates and sends these)
             break;
+         case 2: // a new username (should never happen, because only the server itself creates and sends these)
+            break;
+         case 3: // a user wants to host a new game
+         {
+            String nameOfGame = userThread.readString();
+            int numberOfPlayers = userThread.readInt();
+            int id = addGameSession(nameOfGame, numberOfPlayers);
+            userThread.sendGameId(id);
+            break;
+         }
+         case 4: // a gameId is sent as a message that the game is now open (should never happen, because only the server itself creates and sends these)
+            break;
+         case 5: // a user wants to join a game with the following id
+         {
+            int id = userThread.readInt();
+            boolean accepted = addUserToGame(userThread, id);
+            if (accepted) {
+               System.out.println("accepted into group");
+               userThread.acceptPlayer(id);
+            } else {
+               System.out.println("declined");
+               userThread.declinePlayer();
+            }
+            break;
+         }
+
+         case 6: // a user wants to disband a game-session he hosts
+         {
+            int id = userThread.readInt();
+            removeGameSession(id);
+            break;
+         }
+
+         case 7: // a user wants to invite someone to the game he hosts
+         {
+            System.out.println("invited");
+            String invited = userThread.readString();
+            int gameId = userThread.readInt();
+            ChatServerThread invitedThread = findClientThread(invited);
+            invitedThread.invitePlayer(userThread.getUsername(),getGameSession(gameId).getNameOfGame() ,gameId);
+         }
+
+         case 8: // someone wants to know if a user is part of his gameSession
+         {
+
+         }
+
       }
 
+   }
+
+   private int addGameSession(String nameOfGame, int numberOfPlayers) {
+      int id = ++lastGameId;
+      GameSession newSession = new GameSession(nameOfGame,numberOfPlayers,id);
+      sessions.add(newSession);
+      if(gui!=null) {
+         // TODO: tell the GUI that a new game is hosted
+         gui.addSession(newSession);
+      }
+      return id;
+   }
+
+   private void removeGameSession(int id) {
+      GameSession session = getGameSession(id);
+      session.stop();
+      sessions.remove(session);
+   }
+
+   private GameSession getGameSession(int id) {
+      for (GameSession session: sessions) {
+         if(session.getId()==id) return session;
+      }
+      return null;
+   }
+
+   private boolean addUserToGame(ChatServerThread userThread, int id) {
+      return getGameSession(id).addPlayer(userThread);
    }
 
    private void handleServerControl(String input) {
@@ -193,6 +279,10 @@ public class ChatServer implements Runnable {
          clientCount--;
          toTerminate.stopThread();
       }
+      // also remove the user from his game session if he has one
+       for (GameSession session: sessions) {
+          session.removePlayer(userThread);
+       }
       // tell the others
        if(userThread.getUsername()!=null) {
           for (int i = 0; i < clientCount; i++)

@@ -1,6 +1,7 @@
 package chatServerUndClientGUI;
 
 import chatServerUndClient.ChatServer;
+import chatServerUndClient.GameSession;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,12 +12,13 @@ public class ServerGUI implements ActionListener {
     private ChatServer chatServer = null;
     private JTextArea ta         = null;
     private JList<String> list = null;
+    private JList<String> sessionList = null;
 
     private ServerGUI() {
         // Creating the Frame
         JFrame frame = new JFrame("Server");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 400);
+        frame.setSize(500, 600);
 
         Integer port = null;
         while(port == null) {
@@ -63,12 +65,30 @@ public class ServerGUI implements ActionListener {
         JScrollPane userList = new JScrollPane(list);
         userPanel.add(userListLabel, BorderLayout.BEFORE_FIRST_LINE);
         userPanel.add(userList, BorderLayout.AFTER_LINE_ENDS);
-        userPanel.setMinimumSize(new Dimension(100, 300));
-        userPanel.setPreferredSize(new Dimension(100, 300));
+        userPanel.setMinimumSize(new Dimension(100, 200));
+        userPanel.setPreferredSize(new Dimension(100, 200));
+
+        // session list below
+        JPanel sessionPanel = new JPanel(); // the panel is not visible in output
+        sessionList = new JList<>();
+        sessionList.setFixedCellWidth(100);
+        DefaultListCellRenderer sessionRenderer = (DefaultListCellRenderer) sessionList.getCellRenderer();
+        renderer.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel sessionListLabel = new JLabel("Hosted games:");
+        JScrollPane scrollingSessionList = new JScrollPane(sessionList);
+        sessionPanel.add(sessionListLabel, BorderLayout.BEFORE_FIRST_LINE);
+        sessionPanel.add(scrollingSessionList, BorderLayout.AFTER_LINE_ENDS);
+        sessionPanel.setMinimumSize(new Dimension(100, 200));
+        sessionPanel.setPreferredSize(new Dimension(100, 200));
+
+        // Erzeugung eines JSplitPane-Objektes mit hotizontaler Trennung
+        JSplitPane splitpaneLeft = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitpaneLeft.setTopComponent(userPanel);
+        splitpaneLeft.setBottomComponent(sessionPanel);
 
         // Erzeugung eines JSplitPane-Objektes mit vertikaler Trennung
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitpane.setLeftComponent(userPanel);
+        splitpane.setLeftComponent(splitpaneLeft);
         splitpane.setRightComponent(scrollTa);
 
         // Adding Components to the frame.
@@ -94,6 +114,10 @@ public class ServerGUI implements ActionListener {
     public void writeMessage(String message) {
         ta.append(message+"\n");
         ta.setCaretPosition(ta.getDocument().getLength()); // auto-scrolling
+    }
+
+    public void addSession(GameSession session) {
+
     }
 
     public static void main(String[] args) {

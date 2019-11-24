@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.io.IOException;
 
 public class ClientGUI implements ActionListener {
@@ -16,6 +18,8 @@ public class ClientGUI implements ActionListener {
     private JFrame frame;
     private ChatClient chatClient = null;
     private JList<String> list = null;
+    private JButton buttonInvite = null;
+    private JButton buttonHost = null;
 
     public static void main(String[] args) {
         ClientGUI clientGui = new ClientGUI();
@@ -38,7 +42,9 @@ public class ClientGUI implements ActionListener {
                 // first disconnect
                 killClient(true);
                 // start the ChatClient (workhorse)
-                try { chatClient = new ChatClient( ip.getText(), Integer.parseInt(port.getText()), this ); }
+                try {
+                    chatClient = new ChatClient( ip.getText(), Integer.parseInt(port.getText()), this );
+                }
                 catch(NumberFormatException nfe) {  }
             } else {
                 System.out.println("Login canceled");
@@ -54,6 +60,25 @@ public class ClientGUI implements ActionListener {
                     writeMessage("Sending error: " + ioe.getMessage());
                 }
             tf.setText("");
+        } else if( e.getSource() == buttonHost ) {
+            // HOST A GAME
+            // open a dialog
+            Object[] options = {"Vier gewinnt",
+                    "Chomp"};
+            int n = JOptionPane.showOptionDialog(frame,
+                    "Choose a game",
+                    "Host new session",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[1]);
+            chatClient.hostGame((String) options[n]);
+        } else if( e.getSource() == buttonInvite ) {
+            // INVITE USER TO GAME
+            String invited = list.getSelectedValue();
+            chatClient.invite(invited);
+            writeMessage("You invited "+invited+" to your game of "+chatClient.getHostedGame()+".");
         }
     }
 
@@ -70,10 +95,27 @@ public class ClientGUI implements ActionListener {
             list.setListData(new String[0]);
             writeMessage("Disconnected");
         }
+        buttonHost.setVisible(false);
     }
 
     public void updateUserlist( String[] listData ) {
         list.setListData(listData);
+    }
+
+    public boolean reactToInvitation(String host, String gameName) {
+        // show the invitation and prompt a response
+        System.out.println("reacting");
+        Object[] options = {"Accept",
+                            "Refuse"};
+        int n = JOptionPane.showOptionDialog(frame,
+                host+" invited you to a game of "+gameName,
+                "Invitation",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[1]);
+        return n == 0;
     }
 
     private ClientGUI() {
@@ -110,16 +152,38 @@ public class ClientGUI implements ActionListener {
         JScrollPane scrollTa = new JScrollPane(ta);
 
         // User list at the left
-        JPanel userPanel = new JPanel(); // the panel is not visible in output
+        JPanel userPanel = new JPanel();
         list = new JList<>(new String[0]);
         list.setLayoutOrientation(JList.VERTICAL);
         list.setFixedCellWidth(100);
+        // get the selection and react to it
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // create a button for hosting games
+        buttonHost = new JButton("Host game");
+        buttonHost.addActionListener(this);
+        buttonHost.setVisible(false);
+        // create an initially invisible button for inviting other users to your game
+        buttonInvite = new JButton("Invite");
+        buttonInvite.addActionListener(this);
+        buttonInvite.setVisible(false);
+        list.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent le) {
+                int idx = list.getSelectedIndex();
+                // if something is selected and you are hosting and you didn't select yourself show "Invite"
+                if (idx != -1 && chatClient.getHostedGame()!=null && !list.getModel().getElementAt(idx).equals(chatClient.getUsername()) && !chatClient.inYourGame(list.getModel().getElementAt(idx)) )
+                    buttonInvite.setVisible(true);
+                else
+                    buttonInvite.setVisible(false);
+            }
+        });
         DefaultListCellRenderer renderer = (DefaultListCellRenderer) list.getCellRenderer();
         renderer.setHorizontalAlignment(SwingConstants.CENTER);
         JLabel userListLabel = new JLabel("Online:");
         JScrollPane userList = new JScrollPane(list);
         userPanel.add(userListLabel, BorderLayout.PAGE_START);
         userPanel.add(userList, BorderLayout.CENTER);
+        userPanel.add(buttonHost, BorderLayout.SOUTH);
+        userPanel.add(buttonInvite, BorderLayout.SOUTH);
         userPanel.setMinimumSize(new Dimension(100, 500));
         userPanel.setPreferredSize(new Dimension(100, 500));
 
@@ -134,5 +198,9 @@ public class ClientGUI implements ActionListener {
         frame.getContentPane().add(BorderLayout.PAGE_END, panel);
 
         frame.setVisible(true);
+    }
+
+    public void joinedServer() {    // called by client whenever you join a server (and are authenticated)
+        buttonHost.setVisible(true);
     }
 }
