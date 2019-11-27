@@ -115,7 +115,7 @@ public class ServerGUI implements ActionListener {
         listModel.removeAllElements();
         // add sessions one after another
         for (GameSession session: chatServer.getGameSessions()) {
-            System.out.println("session added");
+            System.out.println("session "+session.getNameOfGame()+" added");
             listModel.addElement(session.getNameOfGame()+", hosted by "+session.getHost());
         }
     }

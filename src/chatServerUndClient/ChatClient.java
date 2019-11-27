@@ -181,6 +181,8 @@ public class ChatClient implements Runnable {
       // your game session has been disbanded
       // TODO: stop the game, if it's already running
       writeChatOutput("Your game session has been disbanded.");
+      // clear the gameSessionPlayer list
+      gameSessionNames.clear();
       joinedGameId = -1;
    }
 
@@ -217,6 +219,7 @@ public class ChatClient implements Runnable {
    void addPlayerToList(String username) {
       if(hostedGame==null) return;
       gameSessionNames.add(username);
+      if(gui!=null) gui.checkListSelection();
    }
 
    void removePlayerFromList(String username) {

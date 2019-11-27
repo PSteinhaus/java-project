@@ -203,4 +203,14 @@ public class ClientGUI implements ActionListener {
     public void joinedServer() {    // called by client whenever you join a server (and are authenticated)
         buttonHost.setVisible(true);
     }
+
+    public void checkListSelection() {
+        // just manually check whether "Invite" should be displayed
+        int idx = list.getSelectedIndex();
+        // if something is selected and you are hosting and you didn't select yourself show "Invite"
+        if (idx != -1 && chatClient.getHostedGame()!=null && !list.getModel().getElementAt(idx).equals(chatClient.getUsername()) && !chatClient.inYourGame(list.getModel().getElementAt(idx)) )
+            buttonInvite.setVisible(true);
+        else
+            buttonInvite.setVisible(false);
+    }
 }

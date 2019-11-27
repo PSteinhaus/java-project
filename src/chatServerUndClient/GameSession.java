@@ -6,6 +6,7 @@ public class GameSession {
     private ChatServerThread[] usersJoined = null;
     private int      numberOfPlayers = 0;
     private int      id = -1; // for the server to be able to identify you easily
+    private boolean  stopped = false;   // whether the game session has been closed (and told it's users about it)
 
     GameSession(String _nameOfGame, int playerCount, int _id) {
         nameOfGame = _nameOfGame;
@@ -31,6 +32,11 @@ public class GameSession {
     public String getNameOfGame() { return nameOfGame; }
 
     synchronized boolean addPlayer(ChatServerThread playerThread) {
+        if(playerThread==null) return false;
+        // first check whether the player is already in the game
+        for (ChatServerThread playerThreadJoined: usersJoined)
+            if(playerThreadJoined==playerThread) return false;
+        // then search a free slot and place the player there
         for (int i=0; i<usersJoined.length; i++)
             if(usersJoined[i]==null) {
                 usersJoined[i] = playerThread;
@@ -78,11 +84,13 @@ public class GameSession {
     }
 
     void stop() {
+        if(stopped) return; // if already stopped don't do anything
         // tell all users that the session is now closed
         for (ChatServerThread thread: usersJoined) {
             if(thread!=null)
             thread.joinedSessionClosed();
         }
+        stopped = true;
         // TODO: stop the game if already launched
     }
 }
