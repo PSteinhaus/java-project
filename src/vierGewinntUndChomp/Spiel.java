@@ -2,9 +2,12 @@ package vierGewinntUndChomp;
 
 import chatServerUndClient.ChatServerThread;
 import chatServerUndClient.GameSession;
+import chatServerUndClient.Helper;
 
 import java.io.IOException;
 import java.util.*;
+
+import static chatServerUndClient.Helper.*;
 
 public abstract class Spiel implements Protokollierbar {
 	protected Spieler[] spieler;
@@ -68,4 +71,13 @@ public abstract class Spiel implements Protokollierbar {
 	} // stop the game
 
 	public abstract void receiveUpdate(byte[] asBytes);
+
+	private void sendTurn(Turn turn) {
+		// send an update to the server ("I want to do this ..."
+		try {
+			sendOutput(serialize(turn));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
