@@ -115,4 +115,19 @@ public class GameSession {
     }
 
     boolean started() { return game != null; }
+
+    void takePlayerInput(ChatServerThread player) {
+        // a player just sent an input for the game, try to follow it
+        if(started())
+            game.receiveInput(player);
+    }
+
+    public void sendGameOutput(byte[] data) {
+        // something happened in the game, send an update to the players
+        for (ChatServerThread player: usersJoined) {
+            if(player!=null) {
+                player.receiveGameUpdate(data);
+            }
+        }
+    }
 }

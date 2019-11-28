@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import chatServerUndClientGUI.ClientGUI;
+import vierGewinntUndChomp.Spiel;
 
 public class ChatClient implements Runnable {
    private Socket socket              = null;
@@ -18,6 +19,7 @@ public class ChatClient implements Runnable {
    private int joinedGameId           = -1;
    private ArrayList<String> gameSessionNames  = new ArrayList<>(6);;
    private boolean gameIsReady = false;
+   private Spiel game                 = null;
 
    public ChatClient(String serverName, int serverPort, ClientGUI gui) {
       this.gui = gui;
@@ -93,6 +95,7 @@ public class ChatClient implements Runnable {
       }
       try {
          if (hostedGameId != -1) stopHosting();
+         if (game      != null)  game.stop();
          if (gui       != null)  gui.killClient(false);
          if (console   != null)  console.close();
          if (streamOut != null)  streamOut.close();
@@ -273,4 +276,10 @@ public class ChatClient implements Runnable {
             break;
       }
    }
+
+    void receiveGameUpdate(byte[] asBytes) {
+        // the server sent an update for the state of the game
+        // make sure it gets to the game
+        if(game!=null) game.receiveUpdate(asBytes);
+    }
 }

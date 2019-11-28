@@ -62,4 +62,9 @@ public class VierGewinnt extends Spiel {
 			System.exit(0);
 		}
 	}
+
+	@Override
+	public void receiveUpdate(byte[] asBytes) {
+		// TODO: do something with the update (it should be a Turn, so deserialize it and try to add it)
+	}
 }

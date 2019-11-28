@@ -57,7 +57,7 @@ public class ChatServerThread extends Thread {
       return null;
    }
 
-   int readInt() {
+   public int readInt() {
        try {
            return streamIn.readInt();
        }
@@ -253,6 +253,22 @@ public class ChatServerThread extends Thread {
         try {
             streamOut.writeInt(10);
             streamOut.writeUTF(nameOfGame);  // which game
+            streamOut.flush();
+        }
+        catch(IOException ioe) { ioError(ioe); }
+    }
+
+    public byte[] readBytes(int numberOfBytes) throws IOException {
+        // just read a certain amount of data from the stream
+        return streamIn.readNBytes(numberOfBytes);
+    }
+
+    void receiveGameUpdate(byte[] data) {
+        // the server side of the game has prepared an update, send it to this player
+        try {
+            streamOut.writeInt(-1);
+            streamOut.writeInt(data.length);  // how many bytes
+            streamOut.write(data);
             streamOut.flush();
         }
         catch(IOException ioe) { ioError(ioe); }

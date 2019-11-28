@@ -54,6 +54,21 @@ public class ChatClientThread extends Thread {
 
    private void handle(int signal) {
       switch(signal) {
+         case -1: // special case for received game updates
+         {
+            try {
+               // first get the number of bytes to read
+               int numberOfBytes = streamIn.readInt();
+               byte[] asBytes = new byte[numberOfBytes];
+               streamIn.read(asBytes, 0, numberOfBytes);
+               client.receiveGameUpdate(asBytes);
+            }
+            catch(IOException ioe) {
+               listenError(ioe);
+            }
+            break;
+         }
+
          case 0:  // just a normal message
             String msg = "";
             try {

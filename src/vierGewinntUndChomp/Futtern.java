@@ -1,5 +1,8 @@
 package vierGewinntUndChomp;
 
+import chatServerUndClient.ChatServerThread;
+
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -69,5 +72,10 @@ public class Futtern extends Spiel {
 			System.out.println(loser.getName()+" hat verloren!");
 			System.exit(0);
 		}
+	}
+
+	@Override
+	public void receiveUpdate(byte[] asBytes) {
+		// TODO: do something with the update (it should be a Turn, so deserialize it and try to add it)
 	}
 }
