@@ -160,8 +160,9 @@ public class ChatServer implements Runnable {
          case 3: // a user wants to host a new game
          {
             String nameOfGame = userThread.readString();
-            int numberOfPlayers = userThread.readInt();
-            int id = addGameSession(nameOfGame, numberOfPlayers);
+            int minNumberOfPlayers = userThread.readInt();
+            int maxNumberOfPlayers = userThread.readInt();
+            int id = addGameSession(nameOfGame, minNumberOfPlayers, maxNumberOfPlayers);
             userThread.sendGameId(id);
             break;
          }
@@ -197,15 +198,24 @@ public class ChatServer implements Runnable {
             int gameId = userThread.readInt();
             ChatServerThread invitedThread = findClientThread(invited);
             invitedThread.invitePlayer(userThread.getUsername(),getGameSession(gameId).getNameOfGame() ,gameId);
+            break;
+         }
+
+         case 8: // a user wants to start the game he hosts
+         {
+            int gameId = userThread.readInt();
+            GameSession session = getGameSession(gameId);
+            if(session!=null && !session.started()) session.startGame();
+            break;
          }
 
       }
 
    }
 
-   private int addGameSession(String nameOfGame, int numberOfPlayers) {
+   private int addGameSession(String nameOfGame, int minNumberOfPlayers, int maxNumberOfPlayers) {
       int id = ++lastGameId;
-      GameSession newSession = new GameSession(nameOfGame,numberOfPlayers,id);
+      GameSession newSession = new GameSession(nameOfGame,minNumberOfPlayers, maxNumberOfPlayers,id);
       sessions.add(newSession);
       return id;
    }
@@ -214,7 +224,7 @@ public class ChatServer implements Runnable {
 
    private void removeGameSession(int id) {
       GameSession session = getGameSession(id);
-      session.stop();
+      if(session!=null) session.stop();
       sessions.remove(session);
       if(gui!=null) gui.updateSessionList();
    }
@@ -227,7 +237,11 @@ public class ChatServer implements Runnable {
    }
 
    private boolean addUserToGame(ChatServerThread userThread, int id) {
-      return getGameSession(id).addPlayer(userThread);
+      GameSession session = getGameSession(id);
+      if(session!=null)
+         return session.addPlayer(userThread);
+      else
+         return false;
    }
 
    private void handleServerControl(String input) {

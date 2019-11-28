@@ -1,20 +1,25 @@
 package chatServerUndClient;
 
+import vierGewinntUndChomp.*;
+
 public class GameSession {
     // acts as a container for who joined this session and what it's about
     private String   nameOfGame = null;
     private ChatServerThread[] usersJoined = null;
     private int      numberOfPlayers = 0;
+    private int      minPlayerCount  = 0;
     private int      id = -1; // for the server to be able to identify you easily
     private boolean  stopped = false;   // whether the game session has been closed (and told it's users about it)
+    private Spiel game = null;
 
-    GameSession(String _nameOfGame, int playerCount, int _id) {
+    GameSession(String _nameOfGame, int _minPlayerCount, int maxPlayerCount, int _id) {
         nameOfGame = _nameOfGame;
-        usersJoined = new ChatServerThread[playerCount];
+        minPlayerCount = _minPlayerCount;
+        usersJoined = new ChatServerThread[maxPlayerCount];
         id = _id;
     }
 
-    public boolean hasPlayer(String playerName) {
+    boolean hasPlayer(String playerName) {
         for (int i=0; i<usersJoined.length; i++)
             if(usersJoined[i]!=null)
                 if(usersJoined[i].getUsername().equals(playerName)) {
@@ -24,6 +29,11 @@ public class GameSession {
     }
 
     int getId() { return id; }
+
+    private boolean isReady() {
+        // returns whether the game is ready to be started
+        return numberOfPlayers >= minPlayerCount;
+    }
 
     public String getHost() {
         return usersJoined[0].getUsername();
@@ -44,7 +54,7 @@ public class GameSession {
                 // tell the others that someone joined
                 for (int j=0; j<usersJoined.length; j++)
                     if(usersJoined[j]!=null) {
-                        usersJoined[j].sendJoin(playerThread.getUsername());
+                        usersJoined[j].sendJoin(playerThread.getUsername(), isReady());
                     }
                 return true;
             }
@@ -61,7 +71,7 @@ public class GameSession {
                 // tell the others that someone left
                 for (int j=0; j<usersJoined.length; j++)
                     if(usersJoined[j]!=null) {
-                        usersJoined[j].sendLeave(playerThread.getUsername());
+                        usersJoined[j].sendLeave(playerThread.getUsername(), isReady());
                     }
                 break;
             }
@@ -73,12 +83,22 @@ public class GameSession {
     }
 
     void startGame() {
+        // tell all players to start the game!
+        for (ChatServerThread player: usersJoined) {
+            if(player!=null) {
+                player.sendStartOfGame(nameOfGame);
+            }
+        }
+
+        // start the game (server-side)
         switch (nameOfGame) {
             case "Chomp":
                 // TODO: start Chomp
+                //game = new Futtern();
                 break;
             case "Vier gewinnt":
                 // TODO: start Vier gewinnt
+                //game = new VierGewinnt();
                 break;
         }
     }
@@ -93,4 +113,6 @@ public class GameSession {
         stopped = true;
         // TODO: stop the game if already launched
     }
+
+    boolean started() { return game != null; }
 }

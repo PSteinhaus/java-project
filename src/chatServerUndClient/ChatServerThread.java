@@ -226,21 +226,33 @@ public class ChatServerThread extends Thread {
         catch(IOException ioe) { ioError(ioe); }
     }
 
-    void sendJoin(String username) {
+    void sendJoin(String username, boolean gameIsReady) {
         // tell the user that another user has been accepted into the game session
         try {
             streamOut.writeInt(8);
-            streamOut.writeUTF(username);  // who joined
+            streamOut.writeUTF(username);           // who joined
+            streamOut.writeBoolean(gameIsReady);    // whether the game can now be started
             streamOut.flush();
         }
         catch(IOException ioe) { ioError(ioe); }
     }
 
-    void sendLeave(String username) {
+    void sendLeave(String username, boolean gameIsReady) {
         // tell the user that another user has left the game session
         try {
             streamOut.writeInt(9);
-            streamOut.writeUTF(username);  // who joined
+            streamOut.writeUTF(username);  // who left
+            streamOut.writeBoolean(gameIsReady);    // whether the game can now be started
+            streamOut.flush();
+        }
+        catch(IOException ioe) { ioError(ioe); }
+    }
+
+    void sendStartOfGame(String nameOfGame) {
+        // tell the user to start a game!
+        try {
+            streamOut.writeInt(10);
+            streamOut.writeUTF(nameOfGame);  // which game
             streamOut.flush();
         }
         catch(IOException ioe) { ioError(ioe); }

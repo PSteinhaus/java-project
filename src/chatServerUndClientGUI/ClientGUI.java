@@ -20,6 +20,7 @@ public class ClientGUI implements ActionListener {
     private JList<String> list = null;
     private JButton buttonInvite = null;
     private JButton buttonHost = null;
+    private JButton buttonStart = null;
 
     public static void main(String[] args) {
         ClientGUI clientGui = new ClientGUI();
@@ -27,7 +28,8 @@ public class ClientGUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if( e.getSource() == menuItemConnect ) {
+        var source = e.getSource();
+        if( source == menuItemConnect ) {
             // CONNECT TO SERVER
             // choose server ip and port
             JTextField ip = new JTextField();
@@ -49,10 +51,10 @@ public class ClientGUI implements ActionListener {
             } else {
                 System.out.println("Login canceled");
             }
-        } else if( e.getSource() == menuItemDisconnect ) {
+        } else if( source == menuItemDisconnect ) {
             // DISCONNECT
             killClient(true);
-        } else if( e.getSource() == tf ) {
+        } else if( source == tf ) {
             // SEND MESSAGE
             if( chatClient != null )
                 try { chatClient.sendMassage(tf.getText()); }
@@ -60,7 +62,7 @@ public class ClientGUI implements ActionListener {
                     writeMessage("Sending error: " + ioe.getMessage());
                 }
             tf.setText("");
-        } else if( e.getSource() == buttonHost ) {
+        } else if( source == buttonHost ) {
             // HOST A GAME
             // open a dialog
             Object[] options = {"Vier gewinnt",
@@ -74,11 +76,13 @@ public class ClientGUI implements ActionListener {
                     options,
                     options[1]);
             chatClient.hostGame((String) options[n]);
-        } else if( e.getSource() == buttonInvite ) {
+        } else if( source == buttonInvite ) {
             // INVITE USER TO GAME
             String invited = list.getSelectedValue();
             chatClient.invite(invited);
-            writeMessage("You invited "+invited+" to your game of "+chatClient.getHostedGame()+".");
+        } else if( source == buttonStart ) {
+            // START THE GAME
+            chatClient.startGame();
         }
     }
 
@@ -96,6 +100,8 @@ public class ClientGUI implements ActionListener {
             writeMessage("Disconnected");
         }
         buttonHost.setVisible(false);
+        buttonInvite.setVisible(false);
+        buttonStart.setVisible(false);
     }
 
     public void updateUserlist( String[] listData ) {
@@ -158,14 +164,22 @@ public class ClientGUI implements ActionListener {
         list.setFixedCellWidth(100);
         // get the selection and react to it
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
         // create a button for hosting games
         buttonHost = new JButton("Host game");
         buttonHost.addActionListener(this);
         buttonHost.setVisible(false);
+
         // create an initially invisible button for inviting other users to your game
         buttonInvite = new JButton("Invite");
         buttonInvite.addActionListener(this);
         buttonInvite.setVisible(false);
+
+        // create an initially invisible button for starting games you're hosting
+        buttonStart = new JButton("Start game");
+        buttonStart.addActionListener(this);
+        buttonStart.setVisible(false);
+
         list.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent le) {
                 int idx = list.getSelectedIndex();
@@ -184,6 +198,7 @@ public class ClientGUI implements ActionListener {
         userPanel.add(userList, BorderLayout.CENTER);
         userPanel.add(buttonHost, BorderLayout.SOUTH);
         userPanel.add(buttonInvite, BorderLayout.SOUTH);
+        userPanel.add(buttonStart, BorderLayout.SOUTH);
         userPanel.setMinimumSize(new Dimension(100, 500));
         userPanel.setPreferredSize(new Dimension(100, 500));
 
@@ -212,5 +227,12 @@ public class ClientGUI implements ActionListener {
             buttonInvite.setVisible(true);
         else
             buttonInvite.setVisible(false);
+    }
+
+    public void setReadyForGame(boolean gameIsReady) {
+        if(gameIsReady && chatClient.getHostedGame()!=null)
+            buttonStart.setVisible(true);
+        else
+            buttonStart.setVisible(false);
     }
 }

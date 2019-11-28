@@ -17,6 +17,7 @@ public class ChatClient implements Runnable {
    private int hostedGameId           = -1;
    private int joinedGameId           = -1;
    private ArrayList<String> gameSessionNames  = new ArrayList<>(6);;
+   private boolean gameIsReady = false;
 
    public ChatClient(String serverName, int serverPort, ClientGUI gui) {
       this.gui = gui;
@@ -124,7 +125,8 @@ public class ChatClient implements Runnable {
       try {
          streamOut.writeInt(3);  // signals that the following is a new game
          streamOut.writeUTF(option);
-         streamOut.writeInt(2);  // number of players (for now always 2)
+         streamOut.writeInt(2);  // minimum number of players (for now always 2)
+         streamOut.writeInt(2);  // maximum number of players (for now always 2)
          streamOut.flush();
       } catch(IOException ioe) {
          sendError(ioe);
@@ -210,6 +212,7 @@ public class ChatClient implements Runnable {
             streamOut.writeInt(hostedGameId);
             streamOut.flush();
             System.out.println("invitation send");
+            writeChatOutput("You invited "+invited+" to your game of "+getHostedGame()+".");
          } catch(IOException ioe) {
             sendError(ioe);
          }
@@ -236,4 +239,38 @@ public class ChatClient implements Runnable {
       return false;
    }
 
+   void setReady(boolean _gameIsReady) {
+      gameIsReady = _gameIsReady;
+      if(gui!=null) gui.setReadyForGame(gameIsReady);
+   }
+
+   public void startGame() {
+      if(getHostedGame()!=null) {
+         // tell the server to start the game
+         try {
+            streamOut.writeInt(8);  // signals that you want to start the game
+            streamOut.writeInt(hostedGameId);   // this game
+            streamOut.flush();
+            writeChatOutput("GAME START");
+         } catch(IOException ioe) {
+            sendError(ioe);
+         }
+      }
+   }
+
+   void startGameProgram(String nameOfGame) {
+      // start the real program that actually runs the game
+      // but first make sure no second game can be started
+      setReady(false);
+      switch (nameOfGame) {
+         case "Chomp":
+            // TODO: start Chomp
+            //game = new Futtern();
+            break;
+         case "Vier gewinnt":
+            // TODO: start Vier gewinnt
+            //game = new VierGewinnt();
+            break;
+      }
+   }
 }

@@ -151,9 +151,11 @@ public class ChatClientThread extends Thread {
          case 8: // a new user joined your game session
          {
             try {
-               String newcomer = streamIn.readUTF();      // who came
+               String newcomer = streamIn.readUTF();           // who came
+               boolean gameIsReady = streamIn.readBoolean();   // whether the game is now ready to be started
                client.addPlayerToList(newcomer);
                client.writeChatOutput(newcomer+" joined the game.");
+               client.setReady(gameIsReady);
             } catch (IOException ioe) {
                listenError(ioe);
             }
@@ -163,9 +165,23 @@ public class ChatClientThread extends Thread {
          case 9: // a user left your game session
          {
             try {
-               String leaving = streamIn.readUTF();      // who left
+               String leaving = streamIn.readUTF();            // who left
+               boolean gameIsReady = streamIn.readBoolean();   // whether the game is now ready to be started
                client.removePlayerFromList(leaving);
                client.writeChatOutput(leaving+" left the game.");
+               client.setReady(gameIsReady);
+            } catch (IOException ioe) {
+               listenError(ioe);
+            }
+            break;
+         }
+
+         case 10: // your game session is actually starting the game!
+         {
+            try {
+               String nameOfGame = streamIn.readUTF(); // which game
+               client.startGameProgram(nameOfGame);
+               client.writeChatOutput("Starting "+nameOfGame+"!");
             } catch (IOException ioe) {
                listenError(ioe);
             }
