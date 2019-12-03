@@ -64,7 +64,11 @@ public class VierGewinnt extends Spiel {
 	}
 
 	@Override
-	public void receiveUpdate(byte[] asBytes) {
-		// TODO: do something with the update (it should be a Turn, so deserialize it and try to add it)
+	protected void integrateTurn(Turn turn) {
+		// TODO: implement this (online)functionality
+	};
+
+	protected void stopGame() {
+		System.exit(0);
 	}
 }

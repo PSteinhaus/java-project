@@ -248,11 +248,16 @@ public class ChatServerThread extends Thread {
         catch(IOException ioe) { ioError(ioe); }
     }
 
-    void sendStartOfGame(String nameOfGame) {
+    void sendStartOfGame(String nameOfGame, int width, int height, String[] playernames) {
         // tell the user to start a game!
         try {
             streamOut.writeInt(10);
             streamOut.writeUTF(nameOfGame);  // which game
+            streamOut.writeInt(width);
+            streamOut.writeInt(height);
+            streamOut.writeInt(playernames.length);
+            for (String name: playernames)
+                streamOut.writeUTF(name);
             streamOut.flush();
         }
         catch(IOException ioe) { ioError(ioe); }

@@ -9,6 +9,8 @@ public abstract class Spielfeld {
 		this.height = height;
 	}
 
+	public abstract boolean integrateTurn(Turn turn);
+
 	public int getWidth() { return width; };
 	public int getHeight() { return height; };
 	public abstract void render();

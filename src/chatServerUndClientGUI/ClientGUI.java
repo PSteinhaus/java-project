@@ -82,7 +82,9 @@ public class ClientGUI implements ActionListener {
             chatClient.invite(invited);
         } else if( source == buttonStart ) {
             // START THE GAME
-            chatClient.startGame();
+            // TODO: ask the user to input the dimensions of the game board first
+            int width, height;
+            //chatClient.startGame(width, height);
         }
     }
 

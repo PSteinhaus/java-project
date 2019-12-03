@@ -13,6 +13,7 @@ public abstract class Spiel implements Protokollierbar {
 	protected Spieler[] spieler;
 	protected Spielfeld spielfeld;
 	protected GameSession session = null;
+	protected boolean isServer = false;
 
 	public abstract void startRound();		// ein Durchgang (eine Runde)
 	public abstract void takeTurn(Spieler player);
@@ -42,6 +43,7 @@ public abstract class Spiel implements Protokollierbar {
 	public void pushTurn(Spieler player, int x, int y) {
 		turns.push( new Turn(player,x,y) );
 	};
+	public void pushTurn(Turn turn) { turns.push(turn); };
 	public void popTurn() {
 		turns.pop();
 	};
@@ -58,8 +60,31 @@ public abstract class Spiel implements Protokollierbar {
 			System.out.println("Error receiving player input: "+ioe.getMessage());
 			return;
 		}
-		// TODO: deserialize the data into a Turn and then act on it
+		try {
+			Turn newTurn = (Turn) Helper.deserialize(data);
+			integrateTurn(newTurn);
+		} catch(IOException | ClassNotFoundException ioe) {
+			stopGame();
+			System.out.println("Error reading received turn: "+ioe.getMessage());
+		}
 	}
+
+	public void receiveUpdate(byte[] asBytes) {
+		try {
+			Turn receivedTurn = (Turn) Helper.deserialize(asBytes);
+			if (receivedTurn != null)
+				integrateTurn(receivedTurn);
+			else
+				stopGame();
+		} catch(IOException | ClassNotFoundException ioe) {
+			stopGame();
+			System.out.println("Error reading received turn: "+ioe.getMessage());
+		}
+	}
+
+	protected abstract void stopGame();
+
+	protected abstract void integrateTurn(Turn turn);
 	
 	private void sendOutput(byte[] output) {
 		// send an update to all the players via the game session
@@ -69,8 +94,6 @@ public abstract class Spiel implements Protokollierbar {
 	public void stop() {
 		
 	} // stop the game
-
-	public abstract void receiveUpdate(byte[] asBytes);
 
 	private void sendTurn(Turn turn) {
 		// send an update to the server ("I want to do this ..."

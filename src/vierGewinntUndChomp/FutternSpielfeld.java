@@ -52,4 +52,9 @@ public class FutternSpielfeld extends Spielfeld {
 		}
 		return false;		// Zug nicht akzeptiert
 	};
+
+	public boolean integrateTurn(Turn turn) {
+		return placeStone(turn.player, turn.x, turn.y);
+	}
+
 }

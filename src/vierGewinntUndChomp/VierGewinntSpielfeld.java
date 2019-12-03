@@ -97,6 +97,11 @@ public class VierGewinntSpielfeld extends Spielfeld {
 		}
 		return -1;	// kein freier Platz übrig (Zug nicht akzeptiert)
 	};
+
+	public boolean integrateTurn(Turn turn) {
+		int retValue = placeStone(turn.player, turn.x);
+		return retValue!=-1;	// return whether the turn has been accepted
+	}
 }
 
 class SimpleLine {

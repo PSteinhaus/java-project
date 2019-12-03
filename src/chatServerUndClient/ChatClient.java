@@ -4,7 +4,12 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import chatServerUndClientGUI.ClientGUI;
+import org.newdawn.slick.AppGameContainer;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.tests.DoubleClickTest;
+import vierGewinntUndChomp.FutternGraphical;
 import vierGewinntUndChomp.Spiel;
+import vierGewinntUndChomp.VierGewinntGraphical;
 
 public class ChatClient implements Runnable {
    private Socket socket              = null;
@@ -247,12 +252,15 @@ public class ChatClient implements Runnable {
       if(gui!=null) gui.setReadyForGame(gameIsReady);
    }
 
-   public void startGame() {
+   public void startGame(int width, int height) {
       if(getHostedGame()!=null) {
          // tell the server to start the game
          try {
             streamOut.writeInt(8);  // signals that you want to start the game
             streamOut.writeInt(hostedGameId);   // this game
+            // TODO: send the dimensions of the game board
+            //streamOut.writeInt(width);
+            //streamOut.writeInt(height);
             streamOut.flush();
             writeChatOutput("GAME START");
          } catch(IOException ioe) {
@@ -261,19 +269,19 @@ public class ChatClient implements Runnable {
       }
    }
 
-   void startGameProgram(String nameOfGame) {
+   void startGameProgram(String nameOfGame, int width, int height, String[] playernames) {
       // start the real program that actually runs the game
       // but first make sure no second game can be started
       setReady(false);
       switch (nameOfGame) {
-         case "Chomp":
-            // TODO: start Chomp
-            //game = new Futtern();
+         case "Chomp": {
+            game = new FutternGraphical(width,height,playernames[0],playernames[1]);
             break;
-         case "Vier gewinnt":
-            // TODO: start Vier gewinnt
-            //game = new VierGewinnt();
+         }
+         case "Vier gewinnt": {
+            game = new VierGewinntGraphical(width,height,playernames[0],playernames[1]);
             break;
+         }
       }
    }
 

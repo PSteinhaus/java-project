@@ -214,8 +214,10 @@ public class ChatServer implements Runnable {
          case 8: // a user wants to start the game he hosts
          {
             int gameId = userThread.readInt();
+            int width = userThread.readInt();
+            int height = userThread.readInt();
             GameSession session = getGameSession(gameId);
-            if(session!=null && !session.started()) session.startGame();
+            if(session!=null && !session.started()) session.startGame(width, height);
             break;
          }
 

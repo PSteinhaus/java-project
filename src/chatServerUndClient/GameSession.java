@@ -1,5 +1,7 @@
 package chatServerUndClient;
 
+import org.newdawn.slick.AppGameContainer;
+import org.newdawn.slick.SlickException;
 import vierGewinntUndChomp.*;
 
 public class GameSession {
@@ -82,23 +84,34 @@ public class GameSession {
         return false;
     }
 
-    void startGame() {
+    String[] getPlayerNames() {
+        String[] names = new String[numberOfPlayers];
+        int i=0;
+        for (ChatServerThread player: usersJoined) {
+            if(player!=null) {
+                names[i++] = player.getUsername();
+            }
+        }
+        return names;
+    }
+
+    void startGame(int width, int height) {
+        // first get all the players names (the games may need this info)
+        String[] names = getPlayerNames();
         // tell all players to start the game!
         for (ChatServerThread player: usersJoined) {
             if(player!=null) {
-                player.sendStartOfGame(nameOfGame);
+                player.sendStartOfGame(nameOfGame, width, height, names);
             }
         }
 
         // start the game (server-side)
         switch (nameOfGame) {
             case "Chomp":
-                // TODO: start Chomp
-                //game = new Futtern();
+                game = new FutternGraphical(width,height,names[0],names[1],this);
                 break;
             case "Vier gewinnt":
-                // TODO: start Vier gewinnt
-                //game = new VierGewinnt();
+                game = new VierGewinntGraphical(width,height,names[0],names[1],this);
                 break;
         }
     }

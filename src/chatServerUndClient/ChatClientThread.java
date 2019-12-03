@@ -195,7 +195,15 @@ public class ChatClientThread extends Thread {
          {
             try {
                String nameOfGame = streamIn.readUTF(); // which game
-               client.startGameProgram(nameOfGame);
+               int width = streamIn.readInt(); // width of the gameboard
+               int height = streamIn.readInt(); // height of the gameboard
+               int playercount = streamIn.readInt(); // number of players
+               String[] names = new String[playercount]; // names of all players
+               for(int i=0; i<playercount; i++) {
+                  // get the names
+                  names[0] = streamIn.readUTF();
+               }
+               client.startGameProgram(nameOfGame, width, height, names);
                client.writeChatOutput("Starting "+nameOfGame+"!");
             } catch (IOException ioe) {
                listenError(ioe);
