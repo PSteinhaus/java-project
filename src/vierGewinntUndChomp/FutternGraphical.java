@@ -47,7 +47,7 @@ public class FutternGraphical extends Spiel {
         }
     }
 
-    protected void stopGame() {game.stopGame();};
+    public void stopGame() {game.stopGame();};
 
     public void startRound() {
         // lass alle Spieler nacheinander ziehen

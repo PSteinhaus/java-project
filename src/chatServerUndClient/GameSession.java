@@ -124,7 +124,10 @@ public class GameSession {
             thread.joinedSessionClosed();
         }
         stopped = true;
-        // TODO: stop the game if already launched
+        if (game!=null) {
+            game.stopGame();
+            game = null;
+        }
     }
 
     boolean started() { return game != null; }

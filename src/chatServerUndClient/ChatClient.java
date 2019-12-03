@@ -189,7 +189,10 @@ public class ChatClient implements Runnable {
 
    void gameSessionDisbanded() {
       // your game session has been disbanded
-      // TODO: stop the game, if it's already running
+      if(game!=null) {
+         game.stopGame();
+         game = null;
+      }
       writeChatOutput("Your game session has been disbanded.");
       // clear the gameSessionPlayer list
       gameSessionNames.clear();
@@ -258,9 +261,8 @@ public class ChatClient implements Runnable {
          try {
             streamOut.writeInt(8);  // signals that you want to start the game
             streamOut.writeInt(hostedGameId);   // this game
-            // TODO: send the dimensions of the game board
-            //streamOut.writeInt(width);
-            //streamOut.writeInt(height);
+            streamOut.writeInt(width);
+            streamOut.writeInt(height);
             streamOut.flush();
             writeChatOutput("GAME START");
          } catch(IOException ioe) {

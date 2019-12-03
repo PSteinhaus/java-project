@@ -82,7 +82,7 @@ public abstract class Spiel implements Protokollierbar {
 		}
 	}
 
-	protected abstract void stopGame();
+	public abstract void stopGame();
 
 	protected abstract void integrateTurn(Turn turn);
 	

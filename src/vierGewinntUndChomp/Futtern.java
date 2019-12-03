@@ -76,10 +76,10 @@ public class Futtern extends Spiel {
 
 	@Override
 	protected void integrateTurn(Turn turn) {
-		// TODO: implement this (online)functionality
+		// implement this (online)functionality
 	};
 
-	protected void stopGame() {
+	public void stopGame() {
 		System.exit(0);
 	}
 }
