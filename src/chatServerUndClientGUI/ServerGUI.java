@@ -23,7 +23,7 @@ public class ServerGUI implements ActionListener {
         Integer port = null;
         while(port == null) {
             // get the port
-            JTextField portField = new JPasswordField();
+            JTextField portField = new JTextField();
             Object[] message = {
                     "Server port:", portField
             };

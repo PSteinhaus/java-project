@@ -33,7 +33,7 @@ public class ClientGUI implements ActionListener {
             // CONNECT TO SERVER
             // choose server ip and port
             JTextField ip = new JTextField();
-            JTextField port = new JPasswordField();
+            JTextField port = new JTextField();
             Object[] message = {
                     "Server IP:", ip,
                     "Port:", port
@@ -84,7 +84,26 @@ public class ClientGUI implements ActionListener {
             // START THE GAME
             // TODO: ask the user to input the dimensions of the game board first
             int width, height;
-            //chatClient.startGame(width, height);
+            // let the user input width and height
+            JTextField wField = new JTextField();
+            JTextField hField = new JTextField();
+            Object[] message = {
+                    "Width:", wField,
+                    "Height:", hField
+            };
+            int option = JOptionPane.showConfirmDialog(frame, message, "Choose board dimensions", JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION) {
+                try {
+                    width = Integer.parseInt(wField.getText());
+                    height = Integer.parseInt(hField.getText());
+                    // check if the board is big enough and start the game
+                    if( width >= 4 && height >= 4 )
+                        chatClient.startGame(width, height);
+                    else
+                        writeMessage("Invalid dimensions, please choose a larger game board");
+                }
+                catch(NumberFormatException nfe) { writeMessage("Can't read this number"); }
+            }
         }
     }
 

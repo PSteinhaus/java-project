@@ -12,7 +12,7 @@ public class ChatServer implements Runnable {
    private ServerSocket server = null;
    private Thread       thread = null;
    private int clientCount = 0;
-   private Map<String,User> knownUsers = Collections.unmodifiableMap(new HashMap<String, User>());
+   private Map<String,User> knownUsers = new HashMap<String, User>();
    private final Path knownUsersPath = Paths.get("users.data");
    private ServerGUI gui = null;
    private String[] userList = new String[0];
