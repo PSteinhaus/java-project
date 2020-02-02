@@ -6,9 +6,12 @@ import org.newdawn.slick.*;
 
 import java.io.IOException;
 
-public class VierGewinntGraphical extends Spiel {
+public class VierGewinntGraphical extends Spiel implements Runnable {
     private final int PLAYERNUMBER = 2;	// Anzahl der Spieler
     private VierGewinntSlick game = null;
+    private Thread       thread = null;
+    private int width, height;
+    private String playername1, playername2;
 
     // for the server
     public VierGewinntGraphical(int width, int height, String playername1, String playername2, GameSession session) {
@@ -19,7 +22,7 @@ public class VierGewinntGraphical extends Spiel {
         spieler[1] = new Spieler(playername2, 'o', true);
         spielfeld = new FutternSpielfeld(width,height);
         // start the graphical game
-        startSlick(width,height,playername1,playername2);
+        //startSlick(width,height,playername1,playername2);
     }
 
     // for the client
@@ -30,15 +33,25 @@ public class VierGewinntGraphical extends Spiel {
         spieler[0] = new Spieler(playername1, 'x', true);
         spieler[1] = new Spieler(playername2, 'o', true);
         spielfeld = new FutternSpielfeld(width,height);
+        this.width = width;
+        this.height = height;
+        this.playername1 = playername1;
+        this.playername2 = playername2;
         // start the graphical game
+        if (thread == null) {
+            thread = new Thread(this);
+            thread.start();
+        }
+    }
+
+    public void run() {
         startSlick(width,height,playername1,playername2);
     }
 
     private void startSlick(int width, int height, String playername1, String playername2) {
         // start the graphical game
         try {
-            // TODO: write constructor
-            //game = new VierGewinntSlick(width,height,playername1,playername2);
+            game = new VierGewinntSlick(width,height,playername1,playername2);
             AppGameContainer container = new AppGameContainer(game);
             container.setDisplayMode(800, 600, false);
             container.start();
