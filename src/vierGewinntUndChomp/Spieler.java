@@ -1,6 +1,8 @@
 package vierGewinntUndChomp;
 
-public class Spieler {
+import java.io.Serializable;
+
+public class Spieler implements Serializable {
 	private String name;
 	private Character symbol;
 	enum PlayerType {

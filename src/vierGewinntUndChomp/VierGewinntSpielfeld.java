@@ -34,12 +34,13 @@ public class VierGewinntSpielfeld extends Spielfeld {
 
 		int[] point = {x_start,y_start};
 		int inEinerReihe = 0;
-		Spieler steinBesitzer = null;
+		String steinBesitzer = null;
+		Spieler steinBesitzerSpieler = null;
 		while(true) {
 			if( Helper.inRange(point[0],0,width-1) && Helper.inRange(point[1],0,height-1) ) { // stell sicher, dass die Werte innerhalb des Spielbretts liegen
 				Spieler neuerSteinBesitzer = getPlayer(point[0],point[1]);
 				if( neuerSteinBesitzer != null ) {
-					if( neuerSteinBesitzer == steinBesitzer )
+					if( neuerSteinBesitzer.getName().equals(steinBesitzer) )
 						inEinerReihe++;
 					else
 						inEinerReihe = 1;
@@ -47,9 +48,13 @@ public class VierGewinntSpielfeld extends Spielfeld {
 				else {
 					inEinerReihe = 0;
 				}
-				steinBesitzer = neuerSteinBesitzer;
+				if(neuerSteinBesitzer!=null)
+					steinBesitzer = neuerSteinBesitzer.getName();
+				else
+					steinBesitzer = null;
+				steinBesitzerSpieler = neuerSteinBesitzer;
 				if( inEinerReihe == 4 ) {
-					winnerOrLoser = steinBesitzer;
+					winnerOrLoser = steinBesitzerSpieler;
 					break;
 				}
 			}
@@ -82,6 +87,19 @@ public class VierGewinntSpielfeld extends Spielfeld {
 			System.out.println();
 		}
 	};
+
+	public int movePossible(int column) {
+		// zuerst stelle sicher, dass die gewählte Spalte existiert
+		if( Helper.inRange( column, 0,getWidth()-1 ) ) {
+			// suche nach der niedrigsten freien Stelle in der Spalte
+			for(int i=0; i<height; i++) {
+				if( getPlayer(column,i) == null ) {	// falls der Platz frei ist
+					return i;
+				}
+			}
+		}
+		return -1;	// kein freier Platz übrig (Zug nicht akzeptiert)
+	}
 
 	public int placeStone(Spieler player, int column) {
 		// zuerst stelle sicher, dass die gewählte Spalte existiert

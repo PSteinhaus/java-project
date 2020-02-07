@@ -76,7 +76,7 @@ public class FutternGraphical extends Spiel {
     }
 
     @Override
-    protected void integrateTurn(Turn turn) {
+    protected boolean integrateTurn(Turn turn) {
         // try to add it to the game and if this works tell so and push the turn on top of your stack
         boolean accepted = ((FutternSpielfeld)spielfeld).integrateTurn(turn);
         if(accepted) {
@@ -92,8 +92,9 @@ public class FutternGraphical extends Spiel {
             // if not, then you have to react to it visually
             else
                 showTurn(turn);
+            return true;
         }
-
+        else return false;
     }
 
     private void showTurn(Turn turn) {

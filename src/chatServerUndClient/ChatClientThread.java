@@ -46,6 +46,7 @@ public class ChatClientThread extends Thread {
             handle(streamIn.readInt());
          }
          catch(IOException ioe) {
+            System.out.println("Error reading the incoming package type");
             System.out.println("Listening error: " + ioe.getMessage());
             client.stop();
          }
@@ -53,6 +54,7 @@ public class ChatClientThread extends Thread {
    }
 
    private void handle(int signal) {
+      System.out.println("Handling message of type "+signal);
       switch(signal) {
          case -1: // special case for received game updates
          {
@@ -61,9 +63,11 @@ public class ChatClientThread extends Thread {
                int numberOfBytes = streamIn.readInt();
                byte[] asBytes = new byte[numberOfBytes];
                streamIn.read(asBytes, 0, numberOfBytes);
+               System.out.println("giving a turn to the client");
                client.receiveGameUpdate(asBytes);
             }
             catch(IOException ioe) {
+               System.out.println("Error receiving a game turn");
                listenError(ioe);
             }
             break;
@@ -75,6 +79,7 @@ public class ChatClientThread extends Thread {
                msg = streamIn.readUTF();
             }
             catch(IOException ioe) {
+               System.out.println("Error receiving a message");
                listenError(ioe);
             }
             if( gui == null ) {
@@ -186,6 +191,7 @@ public class ChatClientThread extends Thread {
                client.writeChatOutput(leaving+" left the game.");
                client.setReady(gameIsReady);
             } catch (IOException ioe) {
+               System.out.println("Error receiving a player who left");
                listenError(ioe);
             }
             break;
@@ -201,11 +207,12 @@ public class ChatClientThread extends Thread {
                String[] names = new String[playercount]; // names of all players
                for(int i=0; i<playercount; i++) {
                   // get the names
-                  names[0] = streamIn.readUTF();
+                  names[i] = streamIn.readUTF();
                }
                client.startGameProgram(nameOfGame, width, height, names);
                client.writeChatOutput("Starting "+nameOfGame+"!");
             } catch (IOException ioe) {
+               System.out.println("Error starting a game");
                listenError(ioe);
             }
             break;

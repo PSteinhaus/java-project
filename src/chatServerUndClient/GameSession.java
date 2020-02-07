@@ -142,6 +142,7 @@ public class GameSession {
         // something happened in the game, send an update to the players
         for (ChatServerThread player: usersJoined) {
             if(player!=null) {
+                System.out.println("sending GameOutput");
                 player.receiveGameUpdate(data);
             }
         }

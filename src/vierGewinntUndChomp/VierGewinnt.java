@@ -64,8 +64,9 @@ public class VierGewinnt extends Spiel {
 	}
 
 	@Override
-	protected void integrateTurn(Turn turn) {
+	protected boolean integrateTurn(Turn turn) {
 		// implement this (online)functionality
+		return true;
 	};
 
 	public void stopGame() {

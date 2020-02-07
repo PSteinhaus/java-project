@@ -10,6 +10,7 @@ import java.util.*;
 import static chatServerUndClient.Helper.*;
 
 public abstract class Spiel implements Protokollierbar {
+	public Spieler activePlayer = null;
 	protected Spieler[] spieler;
 	protected Spielfeld spielfeld;
 	protected GameSession session = null;
@@ -62,6 +63,7 @@ public abstract class Spiel implements Protokollierbar {
 		}
 		try {
 			Turn newTurn = (Turn) Helper.deserialize(data);
+			System.out.println("now integrating a turn");
 			integrateTurn(newTurn);
 		} catch(IOException | ClassNotFoundException ioe) {
 			stopGame();
@@ -72,10 +74,14 @@ public abstract class Spiel implements Protokollierbar {
 	public void receiveUpdate(byte[] asBytes) {
 		try {
 			Turn receivedTurn = (Turn) Helper.deserialize(asBytes);
-			if (receivedTurn != null)
+			if (receivedTurn != null) {
+				System.out.println("now integrating a turn");
 				integrateTurn(receivedTurn);
-			else
+			}
+			else {
+				System.out.println("Stopping game because turn is null");
 				stopGame();
+			}
 		} catch(IOException | ClassNotFoundException ioe) {
 			stopGame();
 			System.out.println("Error reading received turn: "+ioe.getMessage());
@@ -84,9 +90,9 @@ public abstract class Spiel implements Protokollierbar {
 
 	public abstract void stopGame();
 
-	protected abstract void integrateTurn(Turn turn);
+	protected abstract boolean integrateTurn(Turn turn);
 	
-	private void sendOutput(byte[] output) {
+	void sendOutput(byte[] output) {
 		// send an update to all the players via the game session
 		session.sendGameOutput(output);
 	}
@@ -95,12 +101,14 @@ public abstract class Spiel implements Protokollierbar {
 		
 	} // stop the game
 
+	/*
 	private void sendTurn(Turn turn) {
-		// send an update to the server ("I want to do this ..."
+		// send an update to the playersr ("I want to do this ...")
 		try {
-			sendOutput(serialize(turn));
+			session.takePlayerInput() ;sendOutput(serialize(turn));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	*/
 }

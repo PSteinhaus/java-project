@@ -9,6 +9,7 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tests.DoubleClickTest;
 import vierGewinntUndChomp.FutternGraphical;
 import vierGewinntUndChomp.Spiel;
+import vierGewinntUndChomp.Turn;
 import vierGewinntUndChomp.VierGewinntGraphical;
 
 public class ChatClient implements Runnable {
@@ -57,6 +58,7 @@ public class ChatClient implements Runnable {
             stop();
          }
       }
+      System.out.println("stopping...");
       // tell the gui you're dead
       if(gui!=null) {
          gui.killClient(false);
@@ -77,7 +79,7 @@ public class ChatClient implements Runnable {
 
    public String getUsername() { return username; }
 
-   void writeChatOutput(String input) {
+   public void writeChatOutput(String input) {
       if(gui!=null)
          gui.writeMessage(input);
       else
@@ -95,6 +97,7 @@ public class ChatClient implements Runnable {
    }
 
    public void stop() {
+      System.out.println("Stopping the client");
       if (thread != null) { 
          thread = null;
       }
@@ -147,6 +150,7 @@ public class ChatClient implements Runnable {
 
    private void sendError(IOException ioe) {
       writeChatOutput("Sending error: " + ioe.getMessage());
+      System.out.println("Sending error: " + ioe.getMessage());
       stop();
    }
 
@@ -167,6 +171,7 @@ public class ChatClient implements Runnable {
    private void stopHosting() {
       // tell the server to disband you game-session
       try {
+         System.out.println("I want to disband");
          streamOut.writeInt(6);  // signals that you want to disband the session you host
          streamOut.writeInt(hostedGameId);
          streamOut.flush();
@@ -281,7 +286,7 @@ public class ChatClient implements Runnable {
             break;
          }
          case "Vier gewinnt": {
-            game = new VierGewinntGraphical(width,height,playernames[0],playernames[1]);
+            game = new VierGewinntGraphical(width,height,playernames[0],playernames[1], this);
             break;
          }
       }
@@ -291,5 +296,26 @@ public class ChatClient implements Runnable {
         // the server sent an update for the state of the game
         // make sure it gets to the game
         if(game!=null) game.receiveUpdate(asBytes);
+    }
+
+    public void sendGameUpdate(Turn turn) {
+       // tell the server that you did something in the game
+       try {
+          System.out.println("sending a turn");
+          byte[] data;
+          data = Helper.serialize(turn);
+          streamOut.writeInt(-1);  // signals that the following is a move
+          if(hostedGameId!=-1)
+             streamOut.writeInt(hostedGameId);
+          else
+             streamOut.writeInt(joinedGameId);
+          streamOut.writeInt(data.length);  // how many bytes
+          streamOut.write(data);
+          streamOut.flush();
+       } catch(IOException ioe) {
+          sendError(ioe);
+          System.out.println(ioe.getMessage());
+          System.out.println(Arrays.toString(ioe.getStackTrace()));
+       }
     }
 }

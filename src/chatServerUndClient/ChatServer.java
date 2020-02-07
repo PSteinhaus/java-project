@@ -147,6 +147,7 @@ public class ChatServer implements Runnable {
    }
 
    void handle(ChatServerThread userThread, int signal) {
+      System.out.println("Handling a message of type "+signal);
       switch(signal) {
 
          case -1: // special case for game data
@@ -154,8 +155,10 @@ public class ChatServer implements Runnable {
             // first get the session id
             int gameId = userThread.readInt();
             GameSession session = getGameSession(gameId);
-            if (session != null)
+            if (session != null) {
+               System.out.println("now taking playerInput");
                session.takePlayerInput(userThread);
+            }
             break;
          }
 

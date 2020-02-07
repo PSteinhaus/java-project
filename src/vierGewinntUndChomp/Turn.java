@@ -1,7 +1,9 @@
 package vierGewinntUndChomp;
 
+import java.io.Serializable;
+
 //trägt (speichert) alle Daten die einen Zug charakterisieren
-public class Turn {
+public class Turn implements Serializable {
 	public Spieler player;	// Der ziehende Spieler
 	public int x,y;		// Das gewählte Feld (was dort passiert variiert von Spiel zu Spiel)
 	
