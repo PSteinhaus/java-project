@@ -8,3 +8,5 @@ public class Helper {
 		return (value>= min) && (value<= max);
 	}
 }
+//flags for the VM:
+//-Djava.library.path=lib/lwjgl-2.9.3/native/windows

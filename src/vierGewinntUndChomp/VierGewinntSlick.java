@@ -51,6 +51,7 @@ public class VierGewinntSlick extends BasicGame implements ComponentListener {
         }
         this.container = container;
         container.setAlwaysRender(true);
+        container.setShowFPS(false);
         container.setTargetFrameRate(60);
         this.chamber= new Image("vierGewinntUndChomp/VierGewinntKammer.png");
         this.coin1  = new Image("vierGewinntUndChomp/coin2.png");

@@ -95,7 +95,7 @@ public class VierGewinntGraphical extends Spiel implements Runnable {
                 System.out.println(winner.getName() + " hat gewonnen!");
             }
             try {
-                Thread.sleep(9000);
+                Thread.sleep(10000);
             } catch (InterruptedException ie) {
                 System.out.println(ie);
             }

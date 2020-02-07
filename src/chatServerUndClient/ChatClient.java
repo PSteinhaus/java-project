@@ -282,7 +282,7 @@ public class ChatClient implements Runnable {
       setReady(false);
       switch (nameOfGame) {
          case "Chomp": {
-            game = new FutternGraphical(width,height,playernames[0],playernames[1]);
+            game = new FutternGraphical(width,height,playernames[0],playernames[1], this);
             break;
          }
          case "Vier gewinnt": {

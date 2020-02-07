@@ -37,11 +37,21 @@ public class FutternSpielfeld extends Spielfeld {
 		}
 	};
 
+	public boolean movePossible(int x, int y) {
+		// zuerst stelle sicher, dass die gewählte Stelle existiert
+		if( Helper.inRange( x, 0,getWidth()-1 ) && Helper.inRange( y, 0,getHeight()-1 ) ) {
+			if( getPlayer(x,y) == null ) {				// falls der Platz frei ist
+				return true;
+			}
+		}
+		return false;		// Zug nicht akzeptiert
+	};
+
 	public boolean placeStone(Spieler player, int x, int y) {
 		// zuerst stelle sicher, dass die gewählte Stelle existiert
 		if( Helper.inRange( x, 0,getWidth()-1 ) && Helper.inRange( y, 0,getHeight()-1 ) ) {
 			if( getPlayer(x,y) == null ) {				// falls der Platz frei ist
-				for(int j=y; j<height; j++) 			// gehe über alle Felder rechts 
+				for(int j=y; j<height; j++) 			// gehe über alle Felder rechts
 					for(int i=x; i<width; i++) {		// von und unter dem Ankerfeld
 						if( getPlayer(i,j) == null )	// und falls diese Felder frei sind
 							setPlayer(player,i,j);		// platziere Steine dort
