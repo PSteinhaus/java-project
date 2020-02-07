@@ -14,9 +14,11 @@ public class VierGewinntGraphical extends Spiel implements Runnable {
     private Thread       thread = null;
     private int width, height;
     private String playername1, playername2;
+    private Sound winnerSound = new Sound("vierGewinntUndChomp/crowd_reaction_positive_001.wav");
+    private Sound loserSound  = new Sound("vierGewinntUndChomp/crowd_reaction_negative_001.wav");
 
     // for the server
-    public VierGewinntGraphical(int width, int height, String playername1, String playername2, GameSession session) {
+    public VierGewinntGraphical(int width, int height, String playername1, String playername2, GameSession session) throws SlickException {
         this.session = session;
         this.isServer = true;
         this.spieler = new Spieler[PLAYERNUMBER];
@@ -29,7 +31,7 @@ public class VierGewinntGraphical extends Spiel implements Runnable {
     }
 
     // for the client
-    public VierGewinntGraphical(int width, int height, String playername1, String playername2, ChatClient chat) {
+    public VierGewinntGraphical(int width, int height, String playername1, String playername2, ChatClient chat) throws SlickException {
         this.session = null;
         this.client = chat;
         this.isServer = false;
@@ -93,6 +95,10 @@ public class VierGewinntGraphical extends Spiel implements Runnable {
             if(!isServer) {
                 client.writeChatOutput(winner.getName() + " hat gewonnen!");
                 System.out.println(winner.getName() + " hat gewonnen!");
+                if(winner.getName().equals(client.getUsername()))
+                    winnerSound.play();
+                else
+                    loserSound.play();
             }
             try {
                 Thread.sleep(10000);

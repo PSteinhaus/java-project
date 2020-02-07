@@ -282,11 +282,19 @@ public class ChatClient implements Runnable {
       setReady(false);
       switch (nameOfGame) {
          case "Chomp": {
-            game = new FutternGraphical(width,height,playernames[0],playernames[1], this);
+             try {
+                 game = new FutternGraphical(width, height, playernames[0], playernames[1], this);
+             } catch(SlickException se) {
+                 System.out.println("Sound not found: "+se);
+             }
             break;
          }
          case "Vier gewinnt": {
-            game = new VierGewinntGraphical(width,height,playernames[0],playernames[1], this);
+             try {
+                 game = new VierGewinntGraphical(width, height, playernames[0], playernames[1], this);
+             } catch(SlickException se) {
+                 System.out.println("Sound not found: "+se);
+             }
             break;
          }
       }

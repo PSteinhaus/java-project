@@ -7,8 +7,8 @@ import org.newdawn.slick.Image;
 import org.newdawn.slick.gui.AbstractComponent;
 import org.newdawn.slick.gui.ComponentListener;
 import org.newdawn.slick.gui.MouseOverArea;
+import java.util.Random;
 
-import java.awt.*;
 import java.util.Arrays;
 
 public class VierGewinntSlick extends BasicGame implements ComponentListener {
@@ -30,6 +30,7 @@ public class VierGewinntSlick extends BasicGame implements ComponentListener {
     private int destX=-1, destY=-1;
     private float velocity = 0;
     private int activePlayerNumber = -1;
+    private Sound[] coinDropSound;
 
     public VierGewinntSlick(int width, int height, String playername1, String playername2, VierGewinntGraphical game) {
         super("Vier gewinnt");
@@ -53,6 +54,10 @@ public class VierGewinntSlick extends BasicGame implements ComponentListener {
         container.setAlwaysRender(true);
         container.setShowFPS(false);
         container.setTargetFrameRate(60);
+        this.coinDropSound = new Sound[3];
+        this.coinDropSound[0]  = new Sound("vierGewinntUndChomp/chips_drop_single_001.wav");
+        this.coinDropSound[1]  = new Sound("vierGewinntUndChomp/chips_drop_single_002.wav");
+        this.coinDropSound[2]  = new Sound("vierGewinntUndChomp/chips_drop_single_003.wav");
         this.chamber= new Image("vierGewinntUndChomp/VierGewinntKammer.png");
         this.coin1  = new Image("vierGewinntUndChomp/coin2.png");
         this.coin2  = new Image("vierGewinntUndChomp/coin1.png");
@@ -122,6 +127,9 @@ public class VierGewinntSlick extends BasicGame implements ComponentListener {
             for (int j = 0; j < width; ++j)
                 this.areas[j].setAcceptingInput(true);
         activePlayerNumber = -1;    // it's over now
+        // play a sound!
+        Random rand = new Random();
+        coinDropSound[rand.nextInt(3)].play();
     }
 
     void stopGame() {

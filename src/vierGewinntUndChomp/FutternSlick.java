@@ -22,8 +22,9 @@ public class FutternSlick extends BasicGame implements ComponentListener {
     private int[][] fields;
     private String playername1, playername2;
     private int activePlayerNumber = -1;
+    private Sound sound = new Sound("vierGewinntUndChomp/Home_Office_Kitchen_ChopFood_03.wav");
 
-    public FutternSlick(int width, int height, String playername1, String playername2, FutternGraphical game) {
+    public FutternSlick(int width, int height, String playername1, String playername2, FutternGraphical game) throws SlickException {
         super("Futtern");
         this.game = game;
         this.width = width;
@@ -85,6 +86,8 @@ public class FutternSlick extends BasicGame implements ComponentListener {
                         this.areas[i][j].setAcceptingInput(true);   // gebe sie für Input frei
                 }
         }
+        // play a sound!
+        sound.play();
     }
 
     private void setPlayer(Spieler player, int i, int j) {

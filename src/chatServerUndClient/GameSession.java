@@ -108,10 +108,18 @@ public class GameSession {
         // start the game (server-side)
         switch (nameOfGame) {
             case "Chomp":
-                game = new FutternGraphical(width,height,names[0],names[1],this);
+                try {
+                    game = new FutternGraphical(width, height, names[0], names[1], this);
+                } catch(SlickException se) {
+                    System.out.println("Sound not found: "+se);
+                }
                 break;
             case "Vier gewinnt":
-                game = new VierGewinntGraphical(width,height,names[0],names[1],this);
+                try {
+                    game = new VierGewinntGraphical(width, height, names[0], names[1], this);
+                } catch(SlickException se) {
+                    System.out.println("Sound not found: "+se);
+                }
                 break;
         }
     }

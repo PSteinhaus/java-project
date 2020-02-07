@@ -15,9 +15,11 @@ public class FutternGraphical extends Spiel implements Runnable {
     private Thread       thread = null;
     private int width, height;
     private String playername1, playername2;
+    private Sound winnerSound = new Sound("vierGewinntUndChomp/crowd_reaction_positive_001.wav");
+    private Sound loserSound  = new Sound("vierGewinntUndChomp/crowd_reaction_negative_001.wav");
 
     // for the server
-    public FutternGraphical(int width, int height, String playername1, String playername2, GameSession session) {
+    public FutternGraphical(int width, int height, String playername1, String playername2, GameSession session) throws SlickException {
         this.session = session;
         this.isServer = true;
         this.spieler = new Spieler[PLAYERNUMBER];
@@ -30,7 +32,7 @@ public class FutternGraphical extends Spiel implements Runnable {
     }
 
     // for the client
-    public FutternGraphical(int width, int height, String playername1, String playername2, ChatClient chat) {
+    public FutternGraphical(int width, int height, String playername1, String playername2, ChatClient chat) throws SlickException {
         this.session = null;
         this.client = chat;
         this.isServer = false;
@@ -88,12 +90,16 @@ public class FutternGraphical extends Spiel implements Runnable {
     public void checkForEndOfGame() {
         // teste auf Sieg
         System.out.println("testing for victory");
-        Spieler winner = spielfeld.checkForWinner();
-        if( winner != null ) {
+        Spieler loser = spielfeld.checkForWinner();
+        if( loser != null ) {
             // TODO : zeige Sieger an (und beende das Spiel)
             if(!isServer) {
-                client.writeChatOutput(winner.getName() + " hat verloren!");
-                System.out.println(winner.getName() + " hat verloren!");
+                client.writeChatOutput(loser.getName() + " hat verloren!");
+                System.out.println(loser.getName() + " hat verloren!");
+                if(loser.getName().equals(client.getUsername()))
+                    loserSound.play();
+                else
+                    winnerSound.play();
             }
             try {
                 Thread.sleep(10000);
